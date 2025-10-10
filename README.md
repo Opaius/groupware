@@ -20,8 +20,7 @@ Proiectul este construit ca un Monorepo și cuprinde atât aplicația Next.js (F
 
 - Git - Controlul versiunilor
 - Bun - Runtime JavaScript rapid și manager de pachete (recomandat) sau Node.js 18+
-- PostgreSQL 17 - Baza de date relațională principală
-- Redis - Caching, gestionarea sesiunilor și mesagerie real-time (opțional)
+- Windsurf - IDE pentru dezvoltare full-stack cu ai integrat
 
 ## Tool-uri și Librării Folosite
 
