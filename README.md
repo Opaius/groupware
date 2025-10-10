@@ -1,157 +1,105 @@
-🚀 Groupware: Platformă Colaborativă Modernă cu Suport AI
-Acesta este repository-ul oficial pentru proiectul Groupware, o aplicație full-stack modernă, concepută pentru colaborare și productivitate, cu integrare profundă a capabilităților AI.
+# Groupware - Platformă Colaborativă
 
-🎯 Arhitectură și Obiectiv
-Proiectul este construit ca un Monorepo și găzduiește atât aplicația Next.js (Frontend & API Backend), cât și utilitarele de indexing și bazele de date, asigurând o sincronizare perfectă a tipurilor și a dependențelor între toate componentele.
+Aceasta este documentația oficială pentru proiectul Groupware, o aplicație full-stack modernă construită pentru materia Groupware, cu suport pentru colaborare în timp real.
 
-Caracteristici Cheie
-RAG (Retrieval-Augmented Generation): Suport AI pentru căutare contextuală, rezumate și asistență bazată pe documente.
+## Arhitectură și Obiective
 
-Sincronizare Real-Time: Utilizarea Socket.IO (opțional, dar recomandat) pentru a gestiona evenimente în timp real, cum ar fi notificări, mesagerie sau actualizări live ale stării documentelor.
+Proiectul este construit ca un Monorepo și cuprinde atât aplicația Next.js (Frontend și API Backend), cât și configurațiile bazelor de date. Această abordare asigură o sincronizare perfectă a tipurilor și dependențelor între toate componentele.
 
-Structură Modulară: Bazat pe App Router din Next.js, oferind rutare dinamică și rendering pe server/client optimizat.
+## Caracteristici Principale
 
-📦 Cerințe preliminare
-Înainte de a începe, asigurați-vă că aveți instalate următoarele instrumente:
+- Sincronizare Real-Time: Socket.IO pentru gestionarea evenimentelor în timp real, notificări și mesagerie
+- Structură Modulară: App Router din Next.js cu rutare dinamică și rendering optimizat
+- Autentificare și Autorizare: BetterAuth pentru gestionarea utilizatorilor
+- ORM Type-Safe: Drizzle ORM pentru PostgreSQL cu validare Zod
+- State Management: Zustand pentru gestionarea stării aplicației
 
-Git – Controlul versiunilor.
+## Cerințe Preliminare
 
-Bun – Runtime JavaScript rapid și manager de pachete (recomandat, alternativ se poate folosi Node.js).
+Înainte de a începe, asigurați-vă că aveți instalate următoarele:
 
-PostgreSQL 17 – Baza de date relațională principală.
+- Git - Controlul versiunilor
+- Bun - Runtime JavaScript rapid și manager de pachete (recomandat) sau Node.js 18+
+- PostgreSQL 17 - Baza de date relațională principală
+- Redis - Caching, gestionarea sesiunilor și mesagerie real-time (opțional)
 
-Redis – Caching, gestionarea sesiunilor și mesagerie real-time (opțional, dar esențial pentru Socket.IO).
+## Tool-uri și Librării Folosite
 
-Windsurf – AI Assistant pentru coding și sugestii inteligente (instrument de dezvoltare).
+| Tool / Librărie      | Scop                                          | Documentație                                                              |
+| -------------------- | --------------------------------------------- | ------------------------------------------------------------------------- |
+| Next.js              | Framework full-stack (client & server)        | https://nextjs.org / https://www.youtube.com/watch?v=ZjAqacIm9iI          |
+| Tailwind CSS         | Styling utility-first                         | https://tailwindcss.com / https://www.youtube.com/watch?v=ft30zcMlFbE     |
+| shadcn/ui            | Componente UI accesibile, bazate pe Radix     | https://ui.shadcn.com / https://www.youtube.com/watch?v=sIKKpnH1wFc       |
+| Drizzle ORM          | ORM de tip TypeScript-first pentru PostgreSQL | https://drizzle.org / https://www.youtube.com/watch?v=d1b_yqj3dVQ         |
+| Zod                  | Validarea tipurilor și a schemelor de date    | https://zod.dev / https://www.youtube.com/watch?v=L6BE-V2iiWs             |
+| Zustand              | Management de state ușor și rapid             | https://zustand.js.org / https://www.youtube.com/watch?v=RcHlzX0x6Go      |
+| TanStack React Query | Managementul datelor asincrone                | https://tanstack.com/query / https://www.youtube.com/watch?v=r8Dg0KVnfMA  |
+| React Hook Form      | Management simplificat al formularelor        | https://react-hook-form.com / https://www.youtube.com/watch?v=RkXv4AXXC_4 |
+| BetterAuth           | Soluție de autentificare și autorizare        | https://betterauth.dev / https://www.youtube.com/watch?v=eYV5R0oBQiE      |
+| Socket.IO            | Comunicare bi-direcțională, real-time         | https://socket.io / https://www.youtube.com/watch?v=1BfCnjr_Vjg           |
 
-🛠 Tool-uri și Librării Folosite
-Tool / Librărie
+## Securitate și Gestionarea Secretelor
 
-Scop
+Pentru a asigura că variabilele sensibile de mediu (API Keys, parole DB) nu sunt comise în controlul versiunilor, urmăm practica standard de securitate:
 
-Documentație
+- Fișierul Public (.env.example): Acest fișier conține doar cheile variabilelor necesare (fără valori), servind ca șablon pentru ceilalți dezvoltatori. Acesta este comitat în Git.
+- Fișierul Secret (.env): Dezvoltatorii creează o copie a .env.example și o denumesc .env. Aici se completează valorile reale. Acesta este adăugat la .gitignore și nu se commitează.
 
-Next.js
+Pentru medii de producție, se recomandă utilizarea unor soluții enterprise de gestionare a secretelor (AWS Secrets Manager, HashiCorp Vault, Kubernetes Secrets).
 
-Framework full-stack (client & server)
+## Setup și Instalare
 
-Docs
+### 1. Clonarea Repository-ului
 
-Tailwind CSS
+```
+git clone <link-repo>
+cd <nume-proiect>
+```
 
-Styling utility-first
+### 2. Instalarea Dependențelor
 
-Docs
+Folosiți bun pentru instalarea rapidă a pachetelor:
 
-shadcn/ui
-
-Componente UI accesibile, bazate pe Radix
-
-Docs
-
-ui.aceternity
-
-Componente UI suplimentare și efecte vizuale
-
-Docs
-
-Drizzle ORM
-
-ORM de tip TypeScript-first pentru PostgreSQL
-
-Docs
-
-Zod
-
-Validarea tipurilor și a schemelor de date
-
-Docs
-
-Zustand
-
-Management de state ușor și rapid
-
-Docs
-
-TanStack React Query
-
-Managementul datelor asincrone (query-uri și mutații)
-
-Docs
-
-React Hook Form
-
-Management simplificat al formularelor
-
-Docs
-
-BetterAuth
-
-Soluție de autentificare și autorizare
-
-Docs
-
-Socket.IO
-
-Comunicare bi-direcțională, real-time
-
-Docs
-
-🛡️ Securitate și Gestionarea Secretelor
-Pentru a ne asigura că variabilele sensibile de mediu (API Keys, parole DB) nu sunt comise în controlul versiunilor, urmăm practica standard de securitate:
-
-Fișierul Public (.env.example): Acest fișier conține doar cheile variabilelor necesare (fără valori), servind ca șablon pentru ceilalți dezvoltatori. Acest fișier este comitat în Git.
-
-Fișierul Secret (.env): Dezvoltatorii își creează o copie a fișierului _.env.example_ și o denumesc .env. Aici se completează valorile reale ale secretelor. Acest fișier este adăugat la .gitignore și nu părăsește mediul local.
-
-Pentru medii de producție, se recomandă utilizarea unor soluții de gestionare a secretelor de nivel enterprise (ex: AWS Secrets Manager, HashiCorp Vault sau Kubernetes Secrets) în locul fișierelor .env.
-
-⚡ Setup și Instalare
-
-1. Clonarea Repository-ului
-   git clone <link-repo>
-   cd <nume-proiect>
-
-2. Instalarea Dependențelor
-   Folosiți bun pentru instalarea rapidă și consistentă a pachetelor la nivel de monorepo:
-
+```
 bun install
+```
 
-3. Configurarea Variabilelor de Mediu
-   Copiați fișierul .env.example și redenumiti-l .env. Completați-l cu detaliile bazei de date și ale serviciilor externe (AI, Auth):
+Alternativ, cu npm:
 
-# Database Configuration
+```
+npm install
+```
 
-DATABASE_URL="postgresql://user:password@host:port/database"
+### 3. Configurarea Variabilelor de Mediu
 
-# Redis Configuration (Optional)
+Copiați fișierul .env.example și redenumiti-l .env:
 
-REDIS_URL="redis://localhost:6379"
+```
+cp .env.example .env
+```
 
-# External Services (Groq/OpenAI, etc.)
+Structura completă a variabilelor de mediu va fi stabilită mai târziu în proiect.
 
-GROQ_API_KEY="your-groq-api-key"
-GOOGLE_API_KEY="your-google-gemini-key"
+### 4. Configurarea Bazei de Date
 
-# Authentication (BetterAuth)
+Baza de date PostgreSQL poate fi rulată local folosind Docker sau poți folosi o instanță PostgreSQL externă (hosted). Aceasta va fi stabilită mai târziu în proiect.
 
-AUTH_SECRET="your-strong-auth-secret"
+Odată ce baza de date este configurată, aplicați migrațiile:
 
-# ... alte variabile BetterAuth ...
-
-4. Setup Bază de Date (Drizzle)
-   Aplicați migrațiile Drizzle pentru a crea tabelele în baza de date PostgreSQL:
-
-# Rulează migrațiile Drizzle (comandă specifică proiectului dvs.)
-
+```
 bun run db:migrate
+```
 
-5. Rulare Locală
-   Porniți serverul de dezvoltare Next.js. Serverul va include automat API-ul de backend și va servi frontend-ul:
+### 5. Rulare Locală
 
+Porniți serverul de dezvoltare:
+
+```
 bun run dev
+```
 
 Aplicația va fi accesibilă pe http://localhost:3000.
 
-💬 Contribuții și Dezvoltare
-Sunteți încurajat să contribuiți la proiect. Vă rugăm să urmați ghidurile de contribuție (dacă există) și să creați o cerere de pull (Pull Request) pentru orice funcționalitate nouă sau remediere de bug-uri.
+## Contribuții și Dezvoltare
+
+Sunteți încurajat să contribuiți la proiect. Vă rugăm să creați o cerere de pull pentru orice funcționalitate nouă sau remediere de bug-uri.
