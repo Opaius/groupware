@@ -1,135 +1,104 @@
-# Turborepo starter
+# Groupware - Platformă Colaborativă
 
-This Turborepo starter is maintained by the Turborepo core team.
+Aceasta este documentația oficială pentru proiectul Groupware, o aplicație full-stack modernă construită pentru materia Groupware, cu suport pentru colaborare în timp real.
 
-## Using this example
+## Arhitectură și Obiective
 
-Run the following command:
+Proiectul este construit ca un Monorepo și cuprinde atât aplicația Next.js (Frontend și API Backend), cât și configurațiile bazelor de date. Această abordare asigură o sincronizare perfectă a tipurilor și dependențelor între toate componentele.
 
-```sh
-npx create-turbo@latest
-```
+## Caracteristici Principale
 
-## What's inside?
+- Sincronizare Real-Time: Socket.IO pentru gestionarea evenimentelor în timp real, notificări și mesagerie
+- Structură Modulară: App Router din Next.js cu rutare dinamică și rendering optimizat
+- Autentificare și Autorizare: BetterAuth pentru gestionarea utilizatorilor
+- ORM Type-Safe: Drizzle ORM pentru PostgreSQL cu validare Zod
+- State Management: Zustand pentru gestionarea stării aplicației
 
-This Turborepo includes the following packages/apps:
+## Cerințe Preliminare
 
-### Apps and Packages
+Înainte de a începe, asigurați-vă că aveți instalate următoarele:
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- Git - Controlul versiunilor
+- Bun - Runtime JavaScript rapid și manager de pachete (recomandat) sau Node.js 18+
+- Windsurf - IDE pentru dezvoltare full-stack cu ai integrat
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## Tool-uri și Librării Folosite
 
-### Utilities
+| Tool / Librărie      | Scop                                          | Documentație                                                              |
+| -------------------- | --------------------------------------------- | ------------------------------------------------------------------------- |
+| Next.js              | Framework full-stack (client & server)        | https://nextjs.org / https://www.youtube.com/watch?v=ZjAqacIm9iI          |
+| Tailwind CSS         | Styling utility-first                         | https://tailwindcss.com / https://www.youtube.com/watch?v=ft30zcMlFbE     |
+| shadcn/ui            | Componente UI accesibile, bazate pe Radix     | https://ui.shadcn.com / https://www.youtube.com/watch?v=sIKKpnH1wFc       |
+| Drizzle ORM          | ORM de tip TypeScript-first pentru PostgreSQL | https://drizzle.org / https://www.youtube.com/watch?v=d1b_yqj3dVQ         |
+| Zod                  | Validarea tipurilor și a schemelor de date    | https://zod.dev / https://www.youtube.com/watch?v=L6BE-V2iiWs             |
+| Zustand              | Management de state ușor și rapid             | https://zustand.js.org / https://www.youtube.com/watch?v=RcHlzX0x6Go      |
+| TanStack React Query | Managementul datelor asincrone                | https://tanstack.com/query / https://www.youtube.com/watch?v=r8Dg0KVnfMA  |
+| React Hook Form      | Management simplificat al formularelor        | https://react-hook-form.com / https://www.youtube.com/watch?v=RkXv4AXXC_4 |
+| BetterAuth           | Soluție de autentificare și autorizare        | https://betterauth.dev / https://www.youtube.com/watch?v=eYV5R0oBQiE      |
+| Socket.IO            | Comunicare bi-direcțională, real-time         | https://socket.io / https://www.youtube.com/watch?v=1BfCnjr_Vjg           |
 
-This Turborepo has some additional tools already setup for you:
+## Securitate și Gestionarea Secretelor
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+Pentru a asigura că variabilele sensibile de mediu (API Keys, parole DB) nu sunt comise în controlul versiunilor, urmăm practica standard de securitate:
 
-### Build
+- Fișierul Public (.env.example): Acest fișier conține doar cheile variabilelor necesare (fără valori), servind ca șablon pentru ceilalți dezvoltatori. Acesta este comitat în Git.
+- Fișierul Secret (.env): Dezvoltatorii creează o copie a .env.example și o denumesc .env. Aici se completează valorile reale. Acesta este adăugat la .gitignore și nu se commitează.
 
-To build all apps and packages, run the following command:
+Pentru medii de producție, se recomandă utilizarea unor soluții enterprise de gestionare a secretelor (AWS Secrets Manager, HashiCorp Vault, Kubernetes Secrets).
 
-```
-cd my-turborepo
+## Setup și Instalare
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
+### 1. Clonarea Repository-ului
 
 ```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+git clone <link-repo>
+cd <nume-proiect>
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+### 2. Instalarea Dependențelor
+
+Folosiți bun pentru instalarea rapidă a pachetelor:
 
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+bun install
 ```
 
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+Alternativ, cu npm:
 
 ```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+npm install
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+### 3. Configurarea Variabilelor de Mediu
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+Copiați fișierul .env.example și redenumiti-l .env:
 
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+cp .env.example .env
 ```
 
-## Useful Links
+Structura completă a variabilelor de mediu va fi stabilită mai târziu în proiect.
 
-Learn more about the power of Turborepo:
+### 4. Configurarea Bazei de Date
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+Baza de date PostgreSQL poate fi rulată local folosind Docker sau poți folosi o instanță PostgreSQL externă (hosted). Aceasta va fi stabilită mai târziu în proiect.
+
+Odată ce baza de date este configurată, aplicați migrațiile:
+
+```
+bun run db:migrate
+```
+
+### 5. Rulare Locală
+
+Porniți serverul de dezvoltare:
+
+```
+bun run dev
+```
+
+Aplicația va fi accesibilă pe http://localhost:3000.
+
+## Contribuții și Dezvoltare
+
+Sunteți încurajat să contribuiți la proiect. Vă rugăm să creați o cerere de pull pentru orice funcționalitate nouă sau remediere de bug-uri.
