@@ -1,8 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -134,7 +132,7 @@
   --tracking-normal: 0em;
 
   /* Fonts */
-  --font-sans: Inter, sans-serif;
+  --font-sans: var(--font-poppins), sans-serif;
   --font-serif: Source Serif 4, serif;
   --font-mono: IBM Plex Mono, monospace;
 
@@ -194,7 +192,7 @@
   --sidebar-ring: oklch(0.7874 0.1179 295.7538);
   --destructive-foreground: oklch(0.2161 0.0061 56.0434);
   --radius: 1.5rem;
-  --font-sans: Inter, sans-serif;
+  --font-sans: var(--font-poppins), sans-serif;
   --font-serif: Source Serif 4, serif;
   --font-mono: IBM Plex Mono, monospace;
   --shadow-color: hsl(0 0% 0%);

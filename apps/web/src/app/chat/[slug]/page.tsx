@@ -1,6 +1,12 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ChevronLeft, Phone, Video } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronLeft,
+  LucideShieldAlert,
+  Phone,
+  Video,
+} from "lucide-react";
 import { ChatMessage, MessageProp } from "@/components/chat/messages";
 
 const messages: MessageProp[] = [
@@ -50,6 +56,9 @@ export default function ChatPage({ params }: { params: { slug: string } }) {
         {messages.map((message, index) => (
           <ChatMessage key={index} {...message} />
         ))}
+        <div>
+          <LucideShieldAlert className="size-[40px]" />
+        </div>
       </div>
     </div>
   );
