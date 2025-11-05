@@ -30,9 +30,9 @@ export function ChatMessage({
   const isUserSender = senderId === "test";
 
   const iconToRender = useMemo(() => {
-    if (seen) return <LucideCheckCheck className="size-[5px]" />;
-    if (sent) return <LucideCheck className="size-[5px]" />;
-    return <LucideClock className="size-[5px]" />;
+    if (seen) return <LucideCheckCheck className="size-[10px]" />;
+    if (sent) return <LucideCheck className="size-[10px]" />;
+    return <LucideClock className="size-[10px]" />;
   }, [seen, sent]);
   return (
     <div
@@ -47,15 +47,21 @@ export function ChatMessage({
         <AvatarFallback>AC</AvatarFallback>
       </Avatar>
       <div
-        className="px-[8px] py-[12px] text-xs relative rounded-[10px]"
+        className="px-[8px] py-[15px] text-xs relative rounded-[10px]"
         style={{
           backgroundColor: isUserSender
             ? "var(--color-accent)"
-            : "var(--color-muted-foreground)",
+            : "var(--color-muted)",
         }}
       >
         {message}
-        <div className="absolute text-2xs flex bottom-[3px] right-[3px]">
+        <div
+          className="absolute text-2xs items-center flex bottom-[3px]"
+          style={{
+            right: isUserSender ? "auto" : "10px",
+            left: isUserSender ? "10px" : "auto",
+          }}
+        >
           {timeSent.toLocaleTimeString([], {
             hour: "numeric",
             minute: "numeric",

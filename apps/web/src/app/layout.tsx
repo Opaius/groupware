@@ -19,7 +19,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.className} antialiased`}>{children}</body>
+      <body
+        className={`${poppins.className} antialiased flex items-center justify-center w-full `}
+      >
+        <div className="max-w-[400px] border-2 w-full">{children}</div>
+      </body>
     </html>
   );
 }
