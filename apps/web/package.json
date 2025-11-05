@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack && turbo run db:push",
+    "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint"
   },
