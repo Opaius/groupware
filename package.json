@@ -22,7 +22,9 @@
     "packages/*"
   ],
   "dependencies": {
+    "@radix-ui/react-switch": "^1.2.6",
     "@types/node": "^24.8.1",
+    "lucide-react": "^0.552.0",
     "zod": "^4.1.12"
   }
 }
