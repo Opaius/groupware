@@ -70,13 +70,13 @@ export default function ChatPage({ params }: { params: { slug: string } }) {
           placeholder="Type your message"
           containerClassName="border-primary"
           icons={[
-            <Button variant="ghost" size="icon">
+            <Button key={"send"} variant="ghost" size="icon">
               <LucideSend />
             </Button>,
-            <Button variant="ghost" size="icon">
+            <Button key={"paperclip"} variant="ghost" size="icon">
               <LucidePaperclip />
             </Button>,
-            <Button variant="ghost" size="icon">
+            <Button key={"calendar"} variant="ghost" size="icon">
               <LucideCalendar />
             </Button>,
           ]}
