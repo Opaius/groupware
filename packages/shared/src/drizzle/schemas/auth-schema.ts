@@ -1,8 +1,9 @@
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, jsonb } from "drizzle-orm/pg-core";
+import { nationalitati } from "./nationalitati";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
-  name: text("name").notNull(),
+  full_name: text("full_name").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
@@ -11,6 +12,12 @@ export const user = pgTable("user", {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
+  gender: text("gender"),
+  phone: text("phone"),
+  address: jsonb("address"),
+  nationalitate: text("nationalitate").references(() => nationalitati.id, {
+    onDelete: "cascade",
+  }),
 });
 
 export const session = pgTable("session", {
