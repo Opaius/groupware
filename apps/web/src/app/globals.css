@@ -66,10 +66,10 @@
   --shadow-opacity: var(--shadow-opacity);
   --color-shadow-color: var(--shadow-color);
   --color-destructive-foreground: var(--destructive-foreground);
-  --text-xs: 10px;
-  --text-2xs: 5px;
-  --rounded-sm: 5px;
-  --rounded-md: 10px;
+  --text-xs: 15px;
+  --text-2xs: 10px;
+  --radius-sm: 10px;
+  --radius-md: 15px;
 }
 
 :root {
@@ -99,14 +99,14 @@
   --sidebar-foreground: var(--text);
 
   /* Muted & Borders (Derived from new palette) */
-  --muted: #f2f4f7; /* Lighter tint of accent */
-  --muted-foreground: #d5dcea8c; /* Using accent as muted text */
+  --muted: #d5dcea8c; /* Lighter tint of accent */
+  --muted-foreground: #8b9ab7; /* Using accent as muted text */
   --border: #dfe3ec; /* Light tint of accent */
   --input: #dfe3ec; /* Light tint of accent */
   --ring: var(--secondary); /* Using secondary for focus */
 
   /* Destructive (Kept from original) */
-  --destructive: oklch(0.8077 0.1035 19.5706);
+  --destructive: oklch(62.793% 0.25768 29.223);
   --destructive-foreground: oklch(1 0 0);
 
   /* Charts (Mapped to new palette) */
@@ -134,7 +134,7 @@
   --tracking-normal: 0em;
 
   /* Fonts */
-  --font-sans: Inter, sans-serif;
+  --font-sans: var(--font-poppins), sans-serif;
   --font-serif: Source Serif 4, serif;
   --font-mono: IBM Plex Mono, monospace;
 
@@ -194,7 +194,7 @@
   --sidebar-ring: oklch(0.7874 0.1179 295.7538);
   --destructive-foreground: oklch(0.2161 0.0061 56.0434);
   --radius: 1.5rem;
-  --font-sans: Inter, sans-serif;
+  --font-sans: var(--font-poppins), sans-serif;
   --font-serif: Source Serif 4, serif;
   --font-mono: IBM Plex Mono, monospace;
   --shadow-color: hsl(0 0% 0%);
@@ -228,5 +228,13 @@
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
     font-family: var(--font-sans);
+  }
+  .hide-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    overflow-y: scroll;
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 }

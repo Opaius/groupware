@@ -22,7 +22,6 @@
     "packages/*"
   ],
   "dependencies": {
-    "@types/node": "^24.8.1",
-    "zod": "^4.1.12"
+    "@types/node": "^24.8.1"
   }
 }

@@ -1,18 +1,31 @@
+"use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ChevronLeft, Phone, Video } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronLeft,
+  LucideCalendar,
+  LucidePaperclip,
+  LucidePin,
+  LucideSend,
+  LucideShieldAlert,
+  LucideTrash,
+  Phone,
+  Video,
+} from "lucide-react";
 import { ChatMessage, MessageProp } from "@/components/chat/messages";
+import { Textarea } from "@/components/ui/textarea";
 
 const messages: MessageProp[] = [
   {
-    message: "Hello",
-    seen: true,
+    message: "Hello my friend",
+    seen: false,
     sent: true,
     timeSent: new Date(),
     senderId: "test1",
   },
   {
-    message: "Hello",
+    message: "Hello my friend",
     seen: true,
     sent: true,
     timeSent: new Date(),
@@ -22,7 +35,7 @@ const messages: MessageProp[] = [
 
 export default function ChatPage({ params }: { params: { slug: string } }) {
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center min-h-dvh">
       <div className="flex w-full items-center px-[10px] h-[100px] shadow-[0_4px_4px_0_rgba(0,0,0,0.25)]">
         <Button variant="ghost" size="icon">
           <ArrowLeft className="size-[21px]" />
@@ -46,10 +59,28 @@ export default function ChatPage({ params }: { params: { slug: string } }) {
           </Button>
         </div>
       </div>
-      <div className="flex flex-col w-full p-[36px] gap-[10px]">
+      <div className="flex flex-col grow w-full p-[36px] gap-[10px]">
         {messages.map((message, index) => (
           <ChatMessage key={index} {...message} />
         ))}
+      </div>
+      <div className="flex w-full px-[25px]">
+        <Textarea
+          className="grow resize-none overflow-y-scroll hide-scrollbar rounded-md"
+          placeholder="Type your message"
+          containerClassName="border-primary"
+          icons={[
+            <Button variant="ghost" size="icon">
+              <LucideSend />
+            </Button>,
+            <Button variant="ghost" size="icon">
+              <LucidePaperclip />
+            </Button>,
+            <Button variant="ghost" size="icon">
+              <LucideCalendar />
+            </Button>,
+          ]}
+        />
       </div>
     </div>
   );
