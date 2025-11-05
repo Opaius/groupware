@@ -26,6 +26,7 @@
   "exports": {
     "./drizzle": "./src/drizzle/index.ts",
     "./drizzle/schemas": "./src/drizzle/schemas/index.ts",
-    "./drizzle/schemas/expAuth": "./src/drizzle/schemas/expAuth.ts"
+    "./drizzle/schemas/expAuth": "./src/drizzle/schemas/expAuth.ts",
+    "./zod": "./src/zod/index.ts"
   }
 }
