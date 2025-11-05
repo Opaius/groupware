@@ -6,6 +6,9 @@ import { genderEnum, address } from "@repo/shared/zod";
 import { nationalitati } from "@repo/shared/drizzle/schemas";
 
 export const auth = betterAuth({
+  emailAndPassword: {
+    enabled: true,
+  },
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: authSchema,
@@ -40,8 +43,8 @@ export const auth = betterAuth({
         fieldName: "nationalitate",
         type: "string",
         references: {
-          model:"nationalitati",
-          field:"id",
+          model: "nationalitati",
+          field: "id",
         },
       },
     },
