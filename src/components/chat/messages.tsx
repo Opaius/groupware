@@ -1,6 +1,5 @@
 "use client";
 
-import { authClient } from "@/lib/auth/authClient";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LucideCheck, LucideCheckCheck, LucideClock } from "lucide-react";
 import { useMemo } from "react";
