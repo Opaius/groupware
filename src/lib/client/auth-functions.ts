@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 import { LoginFormData, SignupFormData } from "@/lib/zod/auth";
+import { success } from "zod";
 
 export async function login({
   formData,
@@ -26,7 +27,7 @@ export async function login({
   const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
-    return error;
+    return error.message;
   } else {
     revalidatePath(callBackURL, "layout");
     redirect(callBackURL);
@@ -50,7 +51,7 @@ export async function signup({
     password: formData.password,
   });
   if (error) {
-    return error;
+    return error.message;
   } else {
     revalidatePath(callBackURL, "layout");
     redirect(callBackURL);
