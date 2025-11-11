@@ -79,7 +79,7 @@ function SignIn() {
         callBackURL: "/",
       });
       if (error) {
-        setError(error.message);
+        setError(error);
       }
     },
   });
@@ -201,7 +201,7 @@ function SignUp() {
         callBackURL: "/discover",
       });
       if (error) {
-        setError(error.message);
+        setError(error);
       }
     },
   });
