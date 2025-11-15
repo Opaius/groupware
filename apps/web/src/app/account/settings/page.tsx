@@ -30,7 +30,7 @@ const SettingsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center">
-      <div className="w-full max-w-[441px] min-h-screen bg-gray-50">
+      <div className="w-full max-w-[441px] min-h-screen bg-gray-210">
         {/* Header with Profile */}
         <div className="bg-[#BDC7DB] pt-6 pb-16 px-4">
         <button className="mb-6 text-gray-700 hover:text-gray-900">
@@ -57,10 +57,10 @@ const SettingsPage = () => {
       </div>
 
       {/* Settings Content */}
-      <div className="px-4 -mt-8 pb-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-Serif text-gray-900 mb-1">Settings</h1>
-          <p className="text-sm text-gray-900">Manage your account and preferences</p>
+      <div className="px-4 -mt-5 relative z-10 ">
+  <div className="bg-white rounded-t-3xl shadow-lg px-4 pt-5 pb-8">
+          <h1 className="text-2xl font-semibold text-gray-900 mb-1 ">Settings</h1>
+          <p className="font-size-10 font-bold h-5 text-gray-500">Manage your account and preferences</p>
         </div>
 
         {/* Account Section */}
@@ -74,7 +74,7 @@ const SettingsPage = () => {
                 </div>
                 <div className="flex-1 text-left">
                   <p className="font-medium text-gray-900">Edit profile</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Update your profile information</p>
+                  <p className="text-3 text-gray-500 mt-0.5">Update your profile information</p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
               </button>
@@ -87,7 +87,7 @@ const SettingsPage = () => {
                 </div>
                 <div className="flex-1 text-left">
                   <p className="font-medium text-gray-900">Skills & History</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Manage your skills and tracking history</p>
+                  <p className="text-s text-gray-500 mt-0.5">Manage your skills and tracking history</p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
               </button>
