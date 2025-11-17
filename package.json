@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack && bunx convex deploy",
+    "build": "next build --turbopack ",
     "start": "next start",
     "lint": "eslint",
     "gen-types": "bun run generate-types.js"
