@@ -15,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { FaApple, FaGoogle } from "react-icons/fa";
 import { useForm } from "@tanstack/react-form";
 import { loginFormSchema, signupFormSchema } from "@/lib/zod/auth";
-import { login, signup } from "@/lib/client/auth-functions";
+import { authClient } from "@/lib/auth/auth-client";
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
 
@@ -74,13 +74,12 @@ function SignIn() {
       onSubmit: loginFormSchema,
     },
     onSubmit: async ({ value }) => {
-      const error = await login({
-        formData: value,
-        callBackURL: "/",
+      const { error } = await authClient.signIn.email({
+        email: value.email,
+        password: value.password,
+        callbackURL: "/discover",
       });
-      if (error) {
-        setError(error);
-      }
+      if (error) setError(error.message ?? "Something went wrong");
     },
   });
   return (
@@ -183,7 +182,6 @@ function SignIn() {
 
 function SignUp() {
   const [error, setError] = useState<string | null>(null);
-
   const form = useForm({
     defaultValues: {
       name: "",
@@ -196,13 +194,13 @@ function SignUp() {
       onSubmit: signupFormSchema,
     },
     onSubmit: async ({ value }) => {
-      const error = await signup({
-        formData: value,
-        callBackURL: "/discover",
+      const { error } = await authClient.signUp.email({
+        name: value.name,
+        email: value.email,
+        password: value.password,
+        callbackURL: "/discover",
       });
-      if (error) {
-        setError(error);
-      }
+      if (error) setError(error.message ?? "something went wrong");
     },
   });
 

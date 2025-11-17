@@ -8,9 +8,17 @@ import { Eye, EyeOff } from "lucide-react";
 type InputProps = React.ComponentProps<"input"> & {
   icon?: React.ReactElement<React.ComponentProps<"div">>;
   isPassword?: boolean;
+  iconPosition?: "right" | "left";
 };
 
-function Input({ className, type, icon, isPassword, ...props }: InputProps) {
+function Input({
+  className,
+  type,
+  icon,
+  isPassword,
+  iconPosition,
+  ...props
+}: InputProps) {
   const iconProps = {
     ...icon?.props,
     className: "size-[20px] text-muted-foreground shrink-0",
@@ -21,7 +29,10 @@ function Input({ className, type, icon, isPassword, ...props }: InputProps) {
   return (
     <div
       data-slot="input"
-      className="focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive selection:bg-primary  dark:bg-input/30 border-input w-full min-w-0 rounded-md border bg-white! h-[50px]  py-1 shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-background  file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 flex items-center px-[10px] gap-[10px]"
+      className={cn(
+        "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive selection:bg-primary  dark:bg-input/30 border-input w-full min-w-0 rounded-md border bg-white! h-[50px]  py-1 shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-background  file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 flex items-center px-[10px] gap-[10px]",
+        iconPosition == "left" ? "flex-row" : "flex-row-reverse"
+      )}
     >
       {inputIcon}
       <input

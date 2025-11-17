@@ -6,4 +6,4 @@ if (!supabaseUrl) {
   process.exit(1);
 }
 
-await $`supabase gen types typescript --db-url ${supabaseUrl} > src/lib/database.types.ts`;
+await $`supabase gen types --debug typescript --db-url ${supabaseUrl} > src/lib/database.types.ts`;

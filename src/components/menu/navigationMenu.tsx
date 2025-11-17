@@ -20,7 +20,7 @@ export function NavigationMenu() {
     <MenuDock
       items={menuItems}
       variant="large"
-      className="text-primary grid grid-cols-5 rounded-none w-full max-w-[400px] border-x-0 bg-gray-100 fixed bottom-0"
+      className="text-primary grid grid-cols-5 rounded-none w-full max-w-md border-x-0 bg-gray-100 fixed bottom-0"
     />
   );
 }
