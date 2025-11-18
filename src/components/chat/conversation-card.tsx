@@ -1,10 +1,5 @@
-import { api } from "../../../convex/_generated/api";
-import { Doc, Id } from "../../../convex/_generated/dataModel";
-import {
-  getInitials,
-  getRandomColorBasedOnName,
-  useQueryWithStatus,
-} from "@/lib/utils";
+import { Doc } from "../../../convex/_generated/dataModel";
+import { getInitials, getRandomColorBasedOnName } from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useRouter } from "next/navigation";

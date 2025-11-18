@@ -16,6 +16,7 @@ import { FaApple, FaGoogle } from "react-icons/fa";
 import { useForm } from "@tanstack/react-form";
 import { loginFormSchema, signupFormSchema } from "@/lib/zod/auth";
 import { authClient } from "@/lib/auth/auth-client";
+import { useRouter } from "next/navigation";
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
 
@@ -64,7 +65,7 @@ export default function AuthPage() {
 }
 function SignIn() {
   const [error, setError] = useState<string | null>(null);
-
+  const router = useRouter();
   const form = useForm({
     defaultValues: {
       email: "",
@@ -77,9 +78,10 @@ function SignIn() {
       const { error } = await authClient.signIn.email({
         email: value.email,
         password: value.password,
-        callbackURL: "/discover",
+        callbackURL: "/chats",
       });
       if (error) setError(error.message ?? "Something went wrong");
+      else router.push("/chats");
     },
   });
   return (
@@ -182,6 +184,7 @@ function SignIn() {
 
 function SignUp() {
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
   const form = useForm({
     defaultValues: {
       name: "",
@@ -198,9 +201,10 @@ function SignUp() {
         name: value.name,
         email: value.email,
         password: value.password,
-        callbackURL: "/discover",
+        callbackURL: "/chats",
       });
       if (error) setError(error.message ?? "something went wrong");
+      else router.push("/chats");
     },
   });
 

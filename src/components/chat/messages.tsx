@@ -1,76 +1,132 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getInitials } from "@/lib/utils";
+import { cn, getInitials, getRandomColorBasedOnName } from "@/lib/utils";
 import { LucideCheck, LucideCheckCheck, LucideClock } from "lucide-react";
 import { useMemo } from "react";
 
 export type MessageProp = {
   message: string;
   seen: boolean;
-  sent: boolean;
+  currentUserHasSeen?: boolean;
+  allOthersSeen?: boolean;
+  seenByOtherUserNames?: string[];
   timeSent: Date | number;
   senderId: string;
   avatarUrl?: string;
   senderName?: string;
   isOwnMessage?: boolean;
+  /** * If true, the message is currently sending (optimistic).
+   * Displays a clock icon.
+   */
+  sent?: boolean;
 };
 
 export function ChatMessage({
   message,
   seen,
-  sent,
+  currentUserHasSeen,
+  allOthersSeen,
+  seenByOtherUserNames,
   timeSent,
   senderId,
   avatarUrl,
   senderName,
-  isOwnMessage,
+  isOwnMessage = false,
+  sent = false,
 }: MessageProp) {
-  const isUserSender = isOwnMessage ?? false;
-  const timestamp =
-    timeSent instanceof Date ? timeSent : new Date(timeSent ?? Date.now());
+  const timestamp = useMemo(() => {
+    return timeSent instanceof Date
+      ? timeSent
+      : new Date(timeSent ?? Date.now());
+  }, [timeSent]);
 
-  const iconToRender = useMemo(() => {
-    if (seen) return <LucideCheckCheck className="size-[10px]" />;
-    if (sent) return <LucideCheck className="size-[10px]" />;
-    return <LucideClock className="size-[10px]" />;
-  }, [seen, sent]);
+  const timeString = useMemo(() => {
+    return timestamp.toLocaleTimeString([], {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  }, [timestamp]);
+
+  const StatusIcon = useMemo(() => {
+    if (sent) return <LucideClock className="size-3 opacity-70" />;
+
+    if (isOwnMessage) {
+      if (allOthersSeen)
+        return <LucideCheckCheck className="size-3 text-blue-400" />;
+      if (seen || currentUserHasSeen)
+        return <LucideCheckCheck className="size-3 text-primary/60" />;
+      return <LucideCheck className="size-3 text-muted-foreground" />;
+    }
+    return null;
+  }, [sent, allOthersSeen, seen, currentUserHasSeen, isOwnMessage]);
+
+  const avatarColor = getRandomColorBasedOnName(senderName ?? "");
   return (
     <div
-      className="flex items-center gap-[8px]"
-      style={{ flexFlow: isUserSender ? "row-reverse" : "row" }}
+      className={cn(
+        "flex w-full gap-2 ",
+        isOwnMessage ? "justify-end" : "justify-start"
+      )}
     >
-      <Avatar className="size-[36px]">
-        <AvatarImage className="object-cover" src={avatarUrl ?? ""} />
-        <AvatarFallback>
-          {senderName
-            ? getInitials(senderName)
-            : senderId.slice(0, 2).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
+      {/* Left Avatar (for others) */}
+      {!isOwnMessage && (
+        <Avatar className="size-8 shrink-0 mt-auto">
+          <AvatarImage className="object-cover" src={avatarUrl ?? ""} />
+          <AvatarFallback
+            className="text-2xs"
+            style={{ backgroundColor: avatarColor }}
+          >
+            {senderName
+              ? getInitials(senderName)
+              : senderId.slice(0, 2).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+      )}
+
+      {/* Message Bubble */}
       <div
-        className="px-[8px] py-[15px] text-xs relative rounded-[10px]"
-        style={{
-          backgroundColor: isUserSender
-            ? "var(--color-accent)"
-            : "var(--color-muted)",
-        }}
+        className={cn(
+          "relative px-3 py-2 text-sm max-w-[75%] shadow-sm wrap-break-word",
+          "rounded-2xl",
+          isOwnMessage
+            ? "bg-primary text-primary-foreground rounded-br-none"
+            : "bg-muted text-foreground rounded-bl-none"
+        )}
       >
-        {message}
+        <p className="leading-relaxed whitespace-pre-wrap pb-1">{message}</p>
+
+        {/* Meta Footer */}
         <div
-          className="absolute text-2xs items-center flex bottom-[3px]"
-          style={{
-            right: isUserSender ? "auto" : "10px",
-            left: isUserSender ? "10px" : "auto",
-          }}
+          className={cn(
+            "flex items-center gap-1 text-2xs select-none opacity-80",
+            isOwnMessage ? "justify-end" : "justify-start"
+          )}
         >
-          {timestamp.toLocaleTimeString([], {
-            hour: "numeric",
-            minute: "numeric",
-          })}
-          {iconToRender}
+          <span>{timeString}</span>
+
+          {seenByOtherUserNames && seenByOtherUserNames.length > 0 && (
+            <span className="max-w-[80px] truncate">
+              • {seenByOtherUserNames.join(", ")}
+            </span>
+          )}
+
+          {StatusIcon}
         </div>
       </div>
+
+      {/* Right Avatar (for self) */}
+      {isOwnMessage && (
+        <Avatar className="size-8 shrink-0 mt-auto">
+          <AvatarImage className="object-cover" src={avatarUrl ?? ""} />
+          <AvatarFallback
+            className="text-2xs"
+            style={{ backgroundColor: avatarColor }}
+          >
+            {senderName ? getInitials(senderName) : "ME"}
+          </AvatarFallback>
+        </Avatar>
+      )}
     </div>
   );
 }
