@@ -13,11 +13,7 @@ import {
 } from "lucide-react";
 import { ChatMessage } from "@/components/chat/messages";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  getInitials,
-  getRandomColorBasedOnName,
-  useQueryWithStatus,
-} from "@/lib/utils";
+import { getInitials, getRandomColorBasedOnName } from "@/lib/utils";
 import { api } from "../../../../convex/_generated/api";
 import { Doc, Id } from "../../../../convex/_generated/dataModel";
 import { authClient } from "@/lib/auth/auth-client";
@@ -29,7 +25,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery, usePaginatedQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 
 // --- Types ---
@@ -42,20 +38,11 @@ type MessageMetadata = {
   currentUserHasSeen: boolean;
 };
 
-// Extend the DB document with UI-specific fields
-type UIMessage = Doc<"messages"> & {
+// Matches the "Enriched" message returned by the new backend
+type EnrichedMessage = Doc<"messages"> & {
   metadata: MessageMetadata;
-  isOptimistic?: boolean;
-};
-
-// Mimic the return type of getMessagesWithMetadata
-type ChatQueryResponse = {
-  messages: UIMessage[];
-  users: Record<string, { name: string; image: string | null }>;
-  conversation: Doc<"conversations">;
-  participants: Doc<"conversationParticipants">[];
-  otherParticipants: Doc<"conversationParticipants">[];
-  pagination: { continueCursor: string; isDone: boolean };
+  sender?: { name?: string; image?: string | null };
+  isOptimistic?: boolean; // We add this on the client side for pending messages
 };
 
 export default function ChatPage({
@@ -69,79 +56,121 @@ export default function ChatPage({
   const currentUserId = session?.user?.id ?? null;
 
   const router = useRouter();
-  // --- Query Data ---
-  const messagesQueryArgs = useMemo(
-    () => ({
-      conversationId,
-      paginationOpts: { cursor: null, numItems: 20 },
-    }),
-    [conversationId]
+
+  // --- 1. Query Static Header Data (Conversation & Participants) ---
+  const conversationData = useQuery(api.chat.messages.getConversationMetadata, {
+    conversationId,
+  });
+
+  // --- 2. Query Paginated Messages ---
+  const {
+    results: historicalMessages,
+    status,
+    loadMore,
+    isLoading,
+  } = usePaginatedQuery(
+    api.chat.messages.listEnrichedMessages, // The new list function
+    { conversationId },
+    { initialNumItems: 20 }
   );
 
-  // We cast the result to ChatQueryResponse | undefined to inform TS about `isOptimistic`
-  const { data: rawData, isPending } = useQueryWithStatus(
-    api.chat.messages.getMessagesWithMetadata,
-    messagesQueryArgs
-  );
-
-  const data = rawData as ChatQueryResponse | undefined;
+  // --- 3. Local State for Instant "Optimistic" Updates ---
+  // Since updating paginated caches is brittle, we store pending messages locally
+  const [pendingMessages, setPendingMessages] = useState<EnrichedMessage[]>([]);
 
   // --- Scroll Management ---
   const scrollRef = useRef<HTMLDivElement>(null);
-  const serverMessages = useMemo(() => data?.messages ?? [], [data?.messages]);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const suppressAutoScrollRef = useRef(false);
+  const userNearBottomRef = useRef(true);
+
+  // Combine server messages + local pending messages
+  const allMessages = useMemo(() => {
+    const server = (historicalMessages as EnrichedMessage[]) ?? [];
+    // Sort server messages by time, then append pending messages
+    return [...server.sort((a, b) => a.sentAt - b.sentAt), ...pendingMessages];
+  }, [historicalMessages, pendingMessages]);
 
   useEffect(() => {
-    if (serverMessages.length > 0 || isPending) {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const distanceFromBottom =
+        container.scrollHeight - container.scrollTop - container.clientHeight;
+      userNearBottomRef.current = distanceFromBottom < 120;
+    };
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (suppressAutoScrollRef.current) return;
+    if (!userNearBottomRef.current) return;
+    if (allMessages.length > 0) {
       scrollRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }, [serverMessages.length, isPending]);
+  }, [allMessages.length, pendingMessages.length]);
 
-  // --- Mutation & Optimistic Updates ---
-  const [message, setMessage] = useState("");
-
-  const sendMessage = useMutation(
-    api.chat.messages.sendMessage
-  ).withOptimisticUpdate((localStore, args) => {
-    if (!currentUserId) return;
-
-    // Retrieve current state from the cache
-    const existing = localStore.getQuery(
-      api.chat.messages.getMessagesWithMetadata,
-      messagesQueryArgs
-    );
-
-    if (!existing) return;
-
-    // Apply typed optimistic update
-    const optimisticUpdate = createOptimisticUpdate(
-      existing as ChatQueryResponse,
-      args.body,
-      args.conversationId,
-      currentUserId,
-      session?.user
-    );
-
-    localStore.setQuery(
-      api.chat.messages.getMessagesWithMetadata,
-      messagesQueryArgs,
-      optimisticUpdate
-    );
-  });
+  // --- Mutation ---
+  const [messageBody, setMessageBody] = useState("");
+  const sendMessageMutation = useMutation(api.chat.messages.sendMessage);
 
   const handleSend = async () => {
-    if (!message.trim()) return;
-    const bodyToSend = message;
-    setMessage("");
+    if (!messageBody.trim() || !currentUserId) return;
+
+    const tempId = `temp-${Date.now()}` as unknown as Id<"messages">;
+    const now = Date.now();
+    const textToSend = messageBody; // Capture current text
+
+    // 1. Create Optimistic Message
+    const optimisticMsg: EnrichedMessage = {
+      _id: tempId,
+      _creationTime: now,
+      conversationId,
+      senderId: currentUserId,
+      body: textToSend,
+      sentAt: now,
+      isOptimistic: true,
+      sender: {
+        name: session?.user?.name ?? "You",
+        image: session?.user?.image ?? null,
+      },
+      metadata: {
+        seen: false,
+        seenByUserIds: [currentUserId],
+        seenByOtherUserIds: [],
+        allOtherUsersSeen: false,
+        currentUserHasSeen: true,
+      },
+    };
+
+    // 2. Update UI Immediately
+    setPendingMessages((prev) => [...prev, optimisticMsg]);
+    setMessageBody("");
+
+    // Scroll immediately
+    setTimeout(
+      () => scrollRef.current?.scrollIntoView({ behavior: "auto" }),
+      0
+    );
 
     try {
-      await sendMessage({
+      // 3. Send to Server
+      await sendMessageMutation({
         conversationId,
-        body: bodyToSend,
+        body: textToSend,
       });
-      scrollRef.current?.scrollIntoView({ behavior: "auto" });
+
+      // 4. Remove from pending (Server data will take over via usePaginatedQuery subscription)
+      setPendingMessages((prev) => prev.filter((m) => m._id !== tempId));
     } catch (error) {
-      setMessage(bodyToSend);
       console.error("Failed to send message:", error);
+      // Optional: Mark message as error in UI or restore text
+      setPendingMessages((prev) => prev.filter((m) => m._id !== tempId));
+      setMessageBody(textToSend);
     }
   };
 
@@ -152,20 +181,44 @@ export default function ChatPage({
     }
   };
 
-  // --- Header Data ---
-  const headerParticipant = data?.otherParticipants?.[0];
-  const headerProfile = headerParticipant
-    ? data?.users?.[headerParticipant.userId]
-    : undefined;
-  const headerName = headerProfile?.name ?? "Chat";
+  const handleLoadMore = async () => {
+    const container = scrollContainerRef.current;
+    const previousScrollHeight = container?.scrollHeight ?? 0;
+    const previousScrollTop = container?.scrollTop ?? 0;
+
+    suppressAutoScrollRef.current = true;
+
+    try {
+      await loadMore(10);
+    } catch (error) {
+      console.error("Failed to load older messages", error);
+    } finally {
+      requestAnimationFrame(() => {
+        if (container) {
+          const heightDiff = container.scrollHeight - previousScrollHeight;
+          container.scrollTop = previousScrollTop + heightDiff;
+        }
+        suppressAutoScrollRef.current = false;
+      });
+    }
+  };
+
+  // --- Header Logic (Derived from conversationData) ---
+  const headerParticipant = conversationData?.participants?.find(
+    (participant) => participant.userId !== conversationData.currentUserId
+  );
+  // Note: conversationData now has usersById, we can use that if needed,
+  // but for the main header, the participant list is usually enough.
+  const headerProfile =
+    headerParticipant && conversationData?.usersById
+      ? conversationData.usersById[headerParticipant.userId]
+      : undefined;
+
+  const headerName =
+    headerProfile?.name ?? conversationData?.conversation?.name ?? "Chat";
   const headerAvatar = headerProfile?.image;
   const avatarName = getInitials(headerName);
   const avatarColor = getRandomColorBasedOnName(headerName);
-
-  const renderedMessages = useMemo(
-    () => [...serverMessages].sort((a, b) => a.sentAt - b.sentAt),
-    [serverMessages]
-  );
 
   return (
     <div className="flex flex-col h-dvh bg-background">
@@ -190,7 +243,7 @@ export default function ChatPage({
           <div className="flex flex-col overflow-hidden">
             <p className="font-semibold text-sm truncate">{headerName}</p>
             <p className="text-xs text-muted-foreground truncate">
-              {data?.otherParticipants?.length ? "Active now" : "Loading..."}
+              {conversationData ? "Active now" : "Loading..."}
             </p>
           </div>
         </div>
@@ -206,54 +259,56 @@ export default function ChatPage({
       </div>
 
       {/* --- Messages Body --- */}
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col">
-        {isPending && (
+      <div
+        className="flex-1 overflow-y-auto p-4 flex flex-col"
+        ref={scrollContainerRef}
+      >
+        {/* Loading Spinner for initial fetch */}
+        {isLoading && (
           <div className="flex justify-center py-10 text-muted-foreground">
             <Loader2 className="size-6 animate-spin" />
           </div>
         )}
 
-        {!isPending && serverMessages.length === 0 && (
+        {/* Load More Button / Spinner */}
+        {!isLoading && status !== "Exhausted" && (
+          <div className="flex justify-center py-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => void handleLoadMore()}
+            >
+              Load Older Messages
+            </Button>
+          </div>
+        )}
+
+        {!isLoading && allMessages.length === 0 && (
           <div className="flex-1 flex items-center justify-center opacity-50">
             <p className="text-sm">No messages yet. Say hi!</p>
           </div>
         )}
 
         <div className="flex flex-col gap-2 mt-auto">
-          {renderedMessages.map((msg) => {
-            const profileFromUsers = data?.users?.[msg.senderId];
-            const fallbackProfile =
-              !profileFromUsers && msg.senderId === currentUserId
-                ? {
-                    name: session?.user?.name ?? "You",
-                    image: session?.user?.image ?? null,
-                  }
-                : undefined;
+          {allMessages.map((msg) => {
+            // Sender info is now embedded directly in the message!
+            const senderProfile = msg.sender;
 
-            const senderProfile = profileFromUsers ?? fallbackProfile;
-
-            // Safe default metadata
-            const metadata = msg.metadata ?? {
-              seen: msg.senderId === currentUserId,
-              seenByUserIds: [msg.senderId],
-              seenByOtherUserIds: [],
-              allOtherUsersSeen: false,
-              currentUserHasSeen: msg.senderId === currentUserId,
-            };
-
-            const seenByOtherUserNames = metadata.seenByOtherUserIds.map(
-              (userId) => data?.users?.[userId]?.name ?? "Unknown"
+            // Parse seen data
+            const seenByOtherUserNames = msg.metadata.seenByOtherUserIds.map(
+              (userId) =>
+                conversationData?.usersById?.[userId]?.name ?? "Unknown"
             );
 
             return (
               <ChatMessage
                 key={msg._id}
                 message={msg.body}
-                seen={metadata.currentUserHasSeen}
+                seen={msg.metadata.currentUserHasSeen}
                 seenByOtherUserNames={seenByOtherUserNames}
-                allOthersSeen={metadata.allOtherUsersSeen}
-                currentUserHasSeen={metadata.currentUserHasSeen}
-                // We can now access isOptimistic safely without `as any`
+                allOthersSeen={msg.metadata.allOtherUsersSeen}
+                currentUserHasSeen={msg.metadata.currentUserHasSeen}
+                // Optimistic handling
                 sent={msg.isOptimistic ?? false}
                 timeSent={msg.sentAt}
                 senderId={msg.senderId}
@@ -270,9 +325,9 @@ export default function ChatPage({
       {/* --- Input Area --- */}
       <div className="shrink-0 px-4 py-3 bg-background border-t">
         <Textarea
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => setMessageBody(e.target.value)}
           onKeyDown={handleTextareaKeyDown}
-          value={message}
+          value={messageBody}
           className="min-h-[50px] max-h-[200px] w-full resize-none rounded-xl"
           placeholder="Type your message..."
           containerClassName="border-input shadow-sm focus-within:ring-1 focus-within:ring-primary"
@@ -280,7 +335,7 @@ export default function ChatPage({
             <Button
               key="send"
               onClick={() => void handleSend()}
-              disabled={!message.trim()}
+              disabled={!messageBody.trim()}
               variant="ghost"
               size="icon"
               className="text-primary hover:text-primary/80"
@@ -298,64 +353,4 @@ export default function ChatPage({
       </div>
     </div>
   );
-}
-
-/**
- * Creates the optimistic update payload with proper typing.
- */
-function createOptimisticUpdate(
-  existing: ChatQueryResponse,
-  body: string,
-  conversationId: Id<"conversations">,
-  currentUserId: string,
-  sessionUser: { name?: string; image?: string | null } | undefined | null
-): ChatQueryResponse {
-  const now = Date.now();
-
-  // Construct the optimistic message with explicit type
-  const optimisticMessage: UIMessage = {
-    _id: `optimistic-${now}` as unknown as Id<"messages">,
-    _creationTime: now,
-    conversationId,
-    senderId: currentUserId,
-    body,
-    sentAt: now,
-    metadata: {
-      seen: false,
-      seenByUserIds: [currentUserId],
-      seenByOtherUserIds: [],
-      allOtherUsersSeen: false,
-      currentUserHasSeen: true,
-    },
-    isOptimistic: true,
-  };
-
-  // Update Users map if necessary
-  const updatedUsers = existing.users[currentUserId]
-    ? existing.users
-    : {
-        ...existing.users,
-        [currentUserId]: {
-          name: sessionUser?.name ?? "You",
-          image: sessionUser?.image ?? null,
-        },
-      };
-
-  // Update Conversation stats
-  const updatedConversation = existing.conversation
-    ? {
-        ...existing.conversation,
-        updatedAt: now,
-        lastMessageAt: now,
-        lastMessageText: body,
-        lastMessageSenderId: currentUserId,
-      }
-    : existing.conversation;
-
-  return {
-    ...existing,
-    users: updatedUsers,
-    conversation: updatedConversation,
-    messages: [...existing.messages, optimisticMessage],
-  };
 }

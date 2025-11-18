@@ -1,136 +1,109 @@
 // convex/messages.ts
 import { mutation, query } from "../_generated/server";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import { authComponent } from "../auth";
+import { Doc } from "../betterAuth/_generated/dataModel";
 
-export const getMessagesWithMetadata = query({
+
+// --- QUERY 1: The Context (Call this with useQuery) ---
+export const getConversationMetadata = query({
+  args: { conversationId: v.id("conversations") },
+  handler: async (ctx, args) => {
+    const auth = await authComponent.getAuthUser(ctx);
+    if (!auth) throw new ConvexError("Unauthorized");
+
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation) throw new ConvexError("Conversation not found");
+
+    const participants = await ctx.db
+      .query("conversationParticipants")
+      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
+      .collect();
+
+    // Fetch all user profiles for the participants to build a lookup map
+    const userProfiles = await Promise.all(
+      participants.map(async (p) => {
+        const profile = await authComponent.getAnyUserById(ctx, p.userId);
+        return { userId: p.userId, profile };
+      })
+    );
+    
+    const usersById: Record<string, Doc<"user"> | null> = {};
+    userProfiles.forEach(({ userId, profile }) => {
+      usersById[userId] = profile;
+    });
+
+    return { conversation, participants, usersById, currentUserId: auth._id };
+  },
+});
+
+// --- QUERY 2: The List (Call this with usePaginatedQuery) ---
+export const listEnrichedMessages = query({
   args: {
     conversationId: v.id("conversations"),
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, { conversationId, paginationOpts }) => {
-    // --- 0) Auth ---
     const auth = await authComponent.getAuthUser(ctx);
-    if (!auth) return null;
+    if (!auth) throw new ConvexError("Unauthorized");
 
-    // --- 1) Fetch conversation & Participants in parallel ---
-    const [conversation, participants] = await Promise.all([
-      ctx.db.get(conversationId),
-      ctx.db
-        .query("conversationParticipants")
-        .withIndex("by_conversation", (q) => q.eq("conversationId", conversationId))
-        .collect(),
-    ]);
+    // We still need participants internally to calculate "seen" status
+    const participants = await ctx.db
+      .query("conversationParticipants")
+      .withIndex("by_conversation", (q) => q.eq("conversationId", conversationId))
+      .collect();
 
-    if (!conversation) return null;
-
-    const participantIds = participants.map((p) => p.userId);
-    const otherParticipants = participants.filter((p) => p.userId !== auth._id);
-
-    // --- 2) Fetch paginated messages ---
+    // 1. Get Paginated Page
     const messagesPage = await ctx.db
       .query("messages")
       .withIndex("by_conversation", (q) => q.eq("conversationId", conversationId))
       .order("desc")
       .paginate(paginationOpts);
 
-    const messages = messagesPage.page;
-
-    // If page is empty, return early
-    if (messages.length === 0) {
-      return {
-        conversation,
-        participants,
-        otherParticipants,
-        messages: [],
-        users: {},
-        pagination: {
-          continueCursor: messagesPage.continueCursor,
-          isDone: messagesPage.isDone,
-        },
-      };
-    }
-
-    // --- 3) OPTIMIZED: Fetch Metadata ONLY for these messages ---
-    // We use Promise.all to fetch metadata for the 20 messages in parallel.
-    // Convex handles parallel queries very efficiently.
-    const metaResults = await Promise.all(
-      messages.map((msg) =>
-        ctx.db
+    // 2. Enrich Messages (Meta + Sender Info)
+    const enrichedMessages = await Promise.all(
+      messagesPage.page.map(async (msg) => {
+        // Fetch Meta
+        const metaRows = await ctx.db
           .query("messageMeta")
           .withIndex("by_message", (q) => q.eq("messageId", msg._id))
-          .collect()
-      )
-    );
+          .collect();
 
-    // --- 4) Process Metadata ---
-    const messagesWithMeta = messages.map((msg, index) => {
-      const metaRows = metaResults[index]; // Corresponds to the message at this index
-      
-      const seenByUserIds = metaRows.filter((r) => r.seen).map((r) => r.userId);
-      const seenByOtherUserIds = seenByUserIds.filter((uid) => uid !== msg.senderId);
+        // Calculate Seen Logic
+        const seenByUserIds = metaRows.filter((r) => r.seen).map((r) => r.userId);
+        const seenByOtherUserIds = seenByUserIds.filter((uid) => uid !== msg.senderId);
+        const otherParticipantsCount = participants.length - 1;
+        const allOtherUsersSeen =
+          otherParticipantsCount > 0 &&
+          seenByOtherUserIds.length >= otherParticipantsCount;
+        const currentUserHasSeen = seenByUserIds.includes(auth._id) || msg.senderId === auth._id;
 
-      // Calculate if everyone else has seen it
-      // Note: We subtract 1 (the sender) from total participants
-      const otherParticipantsCount = participants.length - 1; 
-      const allOtherUsersSeen = 
-        otherParticipantsCount > 0 && 
-        seenByOtherUserIds.length >= otherParticipantsCount;
+        // Fetch Sender Profile (Embed it directly!)
+        const senderProfile = await authComponent.getAnyUserById(ctx, msg.senderId);
 
-      // Fallback: If I sent it, I have "seen" it.
-      const currentUserHasSeen = seenByUserIds.includes(auth._id) || msg.senderId === auth._id;
-
-      return {
-        ...msg,
-        metadata: {
-          seen: currentUserHasSeen,
-          seenByUserIds,
-          seenByOtherUserIds,
-          allOtherUsersSeen,
-          currentUserHasSeen,
-        },
-      };
-    });
-
-    // --- 5) Fetch Users (Senders + Participants) ---
-    // We use a Set to ensure we only fetch each user once
-    const uniqueUserIds = new Set([
-      ...messages.map((m) => m.senderId),
-      ...participantIds,
-    ]);
-
-    const userProfiles = await Promise.all(
-      Array.from(uniqueUserIds).map(async (userId) => {
-        const profile = await authComponent.getAnyUserById(ctx, userId);
-        return { userId, profile };
+        return {
+          ...msg,
+          sender: senderProfile, // <--- Embed sender info here
+          metadata: {
+            seen: currentUserHasSeen,
+            seenByUserIds,
+            seenByOtherUserIds,
+            allOtherUsersSeen,
+            currentUserHasSeen,
+          },
+        };
       })
     );
 
-    const usersById: Record<string, { name: string; image: string | null }> = {};
-    for (const { userId, profile } of userProfiles) {
-      if (profile) {
-        usersById[userId] = {
-          name: profile.name ?? "Unknown",
-          image: profile.image ?? null,
-        };
-      }
-    }
-
+    // 3. Return STRICT PaginationResult
     return {
-      conversation,
-      participants,
-      otherParticipants,
-      messages: messagesWithMeta,
-      users: usersById,
-      pagination: {
-        continueCursor: messagesPage.continueCursor,
-        isDone: messagesPage.isDone,
-      },
+      page: enrichedMessages,
+      isDone: messagesPage.isDone,
+      continueCursor: messagesPage.continueCursor,
     };
   },
 });
-
 
 
 
