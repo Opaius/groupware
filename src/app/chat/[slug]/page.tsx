@@ -27,6 +27,7 @@ import {
 } from "react";
 import { useMutation, useQuery, usePaginatedQuery } from "convex/react";
 import { useRouter } from "next/navigation";
+import { useCall } from "@/lib/client/useCall";
 
 // --- Types ---
 
@@ -55,6 +56,7 @@ export default function ChatPage({
   const { data: session } = authClient.useSession();
   const currentUserId = session?.user?.id ?? null;
 
+  const { startCall } = useCall();
   const router = useRouter();
 
   // --- 1. Query Static Header Data (Conversation & Participants) ---
@@ -249,11 +251,18 @@ export default function ChatPage({
         </div>
 
         <div className="flex gap-1">
-          <Button variant="ghost" size="icon">
-            <Phone className="size-5 text-muted-foreground" />
+          <Button
+            onClick={() => {
+              startCall(headerParticipant?.userId ?? "");
+              router.push("/chat/" + conversationId + "/call");
+            }}
+            variant="ghost"
+            size="icon"
+          >
+            <Phone className="size-5 " />
           </Button>
           <Button variant="ghost" size="icon">
-            <Video className="size-5 text-muted-foreground" />
+            <Video className="size-5 " />
           </Button>
         </div>
       </div>
@@ -308,10 +317,12 @@ export default function ChatPage({
                 seenByOtherUserNames={seenByOtherUserNames}
                 allOthersSeen={msg.metadata.allOtherUsersSeen}
                 currentUserHasSeen={msg.metadata.currentUserHasSeen}
-                // Optimistic handling
+                currentUserId={currentUserId ?? ""}
+                conversationId={conversationId}
                 sent={msg.isOptimistic ?? false}
                 timeSent={msg.sentAt}
                 senderId={msg.senderId}
+                messageId={msg._id}
                 avatarUrl={senderProfile?.image ?? undefined}
                 senderName={senderProfile?.name ?? undefined}
                 isOwnMessage={msg.senderId === currentUserId}

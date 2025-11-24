@@ -54,3 +54,10 @@ export const allUsers = query({
     return users.filter(user => user._id !== auth._id)
   },
 });
+
+export const getAuthUser = query({
+  args: {},
+  handler: async (ctx) => {
+    return await authComponent.getAuthUser(ctx);
+  },
+})

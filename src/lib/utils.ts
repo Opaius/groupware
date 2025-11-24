@@ -34,3 +34,4 @@ export function getRandomColorBasedOnName(name: string) {
 
     return `hsl(${hue} ${saturation}% ${lightness}%)`;
 }
+

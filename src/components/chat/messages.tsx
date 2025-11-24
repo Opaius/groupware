@@ -2,8 +2,45 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn, getInitials, getRandomColorBasedOnName } from "@/lib/utils";
+import { useMutation } from "convex/react";
 import { LucideCheck, LucideCheckCheck, LucideClock } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { api } from "../../../convex/_generated/api";
+import { Id } from "../../../convex/_generated/dataModel";
+
+const useSeenMessage = (
+  messageId: string,
+  conversationId: string,
+  userId: string
+) => {
+  const ref = useRef(null);
+  const markSeen = useMutation(api.chat.messages.markSeen);
+
+  useEffect(() => {
+    if (!ref.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting) {
+          markSeen({
+            messageId: messageId as Id<"messages">,
+            conversationId: conversationId as Id<"conversations">,
+            userId,
+          });
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 } // 50% visible = seen
+    );
+
+    observer.observe(ref.current);
+
+    return () => observer.disconnect();
+  }, [messageId, conversationId, userId, markSeen]);
+
+  return ref;
+};
 
 export type MessageProp = {
   message: string;
@@ -24,6 +61,7 @@ export type MessageProp = {
 
 export function ChatMessage({
   message,
+  messageId,
   seen,
   currentUserHasSeen,
   allOthersSeen,
@@ -34,7 +72,13 @@ export function ChatMessage({
   senderName,
   isOwnMessage = false,
   sent = false,
-}: MessageProp) {
+  conversationId,
+  currentUserId,
+}: MessageProp & {
+  conversationId: string;
+  currentUserId: string;
+  messageId: string;
+}) {
   const timestamp = useMemo(() => {
     return timeSent instanceof Date
       ? timeSent
@@ -48,6 +92,7 @@ export function ChatMessage({
     });
   }, [timestamp]);
 
+  const ref = useSeenMessage(messageId, conversationId, currentUserId);
   const StatusIcon = useMemo(() => {
     if (sent) return <LucideClock className="size-3 opacity-70" />;
 
@@ -64,6 +109,7 @@ export function ChatMessage({
   const avatarColor = getRandomColorBasedOnName(senderName ?? "");
   return (
     <div
+      ref={ref}
       className={cn(
         "flex w-full gap-2 ",
         isOwnMessage ? "justify-end" : "justify-start"

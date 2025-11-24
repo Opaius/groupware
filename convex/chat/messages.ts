@@ -164,3 +164,26 @@ export const sendMessage = mutation({
     };
   },
 });
+
+
+export const markSeen = mutation({
+  args: { messageId: v.id("messages"), conversationId: v.id("conversations"), userId: v.string() },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("messageMeta")
+      .withIndex("by_message", (q) => q.eq("messageId", args.messageId))
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .unique();
+
+    if (!existing) {
+      await ctx.db.insert("messageMeta", {
+        conversationId: args.conversationId,
+        messageId: args.messageId,
+        userId: args.userId,
+        seen: true,
+      });
+    } else if (!existing.seen) {
+      await ctx.db.patch(existing._id, { seen: true });
+    }
+  },
+});
