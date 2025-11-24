@@ -164,52 +164,6 @@ export default function DiscoverPage() {
         </button>
       </div>
 
-      {/* Bottom Navigation with Motion */}
-      <div className="mt-auto">
-        <Dock 
-          items={[
-            {
-              label: 'Discover',
-              icon: <Home className="w-6 h-6 text-gray-700" />,
-              onClick: () => setActiveTab('discover'),
-              className: activeTab === 'discover' ? 'bg-blue-100 border-blue-400' : 'bg-white hover:bg-blue-900/50'
-            },
-            {
-              label: 'Filter',
-              icon: <SlidersHorizontal className="w-6 h-6 text-gray-700" />,
-              onClick: () => setActiveTab('filter'),
-              className: activeTab === 'filter' ? 'bg-blue-100 border-blue-400' : 'bg-white hover:bg-blue-900/50'
-            },
-            {
-              label: 'Chat',
-              icon: <MessageCircle className="w-6 h-6 text-gray-700" />,
-              onClick: () => setActiveTab('chat'),
-              className: activeTab === 'chat' ? 'bg-blue-100 border-blue-400' : 'bg-white hover:bg-blue-900/50'
-            },
-            {
-              label: 'Notify',
-              icon: <Bell className="w-6 h-6 text-gray-700" />,
-              onClick: () => setActiveTab('notify'),
-              className: activeTab === 'notify' ? 'bg-blue-100 border-blue-400' : 'bg-white hover:bg-blue-900/50' 
-            },
-            {
-              label: 'Profile',
-              icon: <UserPen className="w-6 h-6 text-gray-700" />,
-              onClick: () => setActiveTab('profile'),
-              className: activeTab === 'profile' ? 'bg-blue-100 border-blue-400' : 'bg-white hover:bg-blue-900/50'
-            }
-          ]}
-          panelHeight={72}
-          baseItemSize={48}
-          magnification={56}
-          className="bg-white/90 backdrop-blur-md"
-          spring={{
-            mass: 0.1,
-            stiffness: 200,
-            damping: 15
-          }}
-        />
-      </div>
       
 
       {showMatchModal && (
