@@ -5,8 +5,8 @@ export default function MenuLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col h-full min-h-screen">
-      <div className="flex-1">{children}</div>
+    <div className="flex flex-col h-screen">
+      <div className="flex-1 overflow-auto pb-24">{children}</div>
       <NavigationMenu />
     </div>
   );
