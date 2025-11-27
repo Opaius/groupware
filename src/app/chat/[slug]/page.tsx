@@ -28,6 +28,7 @@ import {
 import { useMutation, useQuery, usePaginatedQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useCall } from "@/lib/client/useCall";
+import { BackButton } from "@/components/back-button";
 
 // --- Types ---
 
@@ -73,7 +74,7 @@ export default function ChatPage({
   } = usePaginatedQuery(
     api.chat.messages.listEnrichedMessages, // The new list function
     { conversationId },
-    { initialNumItems: 20 }
+    { initialNumItems: 20 },
   );
 
   // --- 3. Local State for Instant "Optimistic" Updates ---
@@ -156,7 +157,7 @@ export default function ChatPage({
     // Scroll immediately
     setTimeout(
       () => scrollRef.current?.scrollIntoView({ behavior: "auto" }),
-      0
+      0,
     );
 
     try {
@@ -207,7 +208,7 @@ export default function ChatPage({
 
   // --- Header Logic (Derived from conversationData) ---
   const headerParticipant = conversationData?.participants?.find(
-    (participant) => participant.userId !== conversationData.currentUserId
+    (participant) => participant.userId !== conversationData.currentUserId,
   );
   // Note: conversationData now has usersById, we can use that if needed,
   // but for the main header, the participant list is usually enough.
@@ -226,15 +227,7 @@ export default function ChatPage({
     <div className="flex flex-col h-dvh bg-background">
       {/* --- Header --- */}
       <div className="flex shrink-0 items-center px-4 h-16 border-b shadow-sm z-10 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="mr-2"
-          onClick={() => router.back()}
-        >
-          <ArrowLeft className="size-5" />
-        </Button>
-
+        <BackButton />
         <div className="grow flex items-center gap-3 overflow-hidden">
           <Avatar className="size-10 border">
             <AvatarImage src={headerAvatar ?? ""} />
@@ -306,7 +299,7 @@ export default function ChatPage({
             // Parse seen data
             const seenByOtherUserNames = msg.metadata.seenByOtherUserIds.map(
               (userId) =>
-                conversationData?.usersById?.[userId]?.name ?? "Unknown"
+                conversationData?.usersById?.[userId]?.name ?? "Unknown",
             );
 
             return (

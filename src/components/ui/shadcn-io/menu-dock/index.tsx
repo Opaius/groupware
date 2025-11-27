@@ -49,7 +49,7 @@ export const MenuDock: React.FC<MenuDockProps> = ({
     if (!isValid) {
       console.warn(
         "MenuDock: 'items' prop is invalid or missing. Using default items.",
-        items
+        items,
       );
       return defaultItems;
     }
@@ -91,7 +91,7 @@ export const MenuDock: React.FC<MenuDockProps> = ({
           setUnderlineLeft(
             buttonRect.left -
               containerRect.left +
-              (buttonRect.width - textRect.width) / 2
+              (buttonRect.width - textRect.width) / 2,
           );
         }
       }
@@ -106,21 +106,33 @@ export const MenuDock: React.FC<MenuDockProps> = ({
     if (!pathnameMaps) return;
 
     const index = finalItems.findIndex((item) => {
+      // 1. Get the list of paths associated with this item's link
       const paths = pathnameMaps[item.link || ""];
 
       if (!paths) return false;
 
+      // 2. Check if the current pathname matches any of the item's paths
       return paths.some((p) => {
+        // Check for wildcard match (e.g., "/users/*")
         if (p.endsWith("/*")) {
-          const base = p.slice(0, -1); // remove "*"
+          // Log the wildcard path for debugging (optional)
+          console.log("Checking wildcard path:", p);
+
+          // **FIX:** Slice off the last TWO characters: '/*'
+          const base = p.slice(0, -2);
+
+          // Match if the current pathname starts with the base path
+          // For "/users/*", this matches "/users", "/users/123", etc.
           return pathname.startsWith(base);
         }
+
+        // Standard exact path match
         return pathname === p;
       });
     });
 
     setActiveIndex(index !== -1 ? index : null);
-  }, [pathname, finalItems, pathnameMaps]);
+  }, [pathname, finalItems, pathnameMaps]); // Dependencies look correct
 
   const handleItemClick = (index: number, item: MenuDockItem) => {
     setActiveIndex(index);
@@ -163,7 +175,7 @@ export const MenuDock: React.FC<MenuDockProps> = ({
         "relative inline-flex items-center rounded-xl bg-card border shadow-sm",
         orientation === "horizontal" ? "flex-row" : "flex-col",
         styles.container,
-        className
+        className,
       )}
       role="navigation"
     >
@@ -182,7 +194,7 @@ export const MenuDock: React.FC<MenuDockProps> = ({
               "hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               styles.item,
               isActive && "text-primary",
-              !isActive && "text-muted-foreground hover:text-foreground"
+              !isActive && "text-muted-foreground hover:text-foreground",
             )}
             onClick={() => handleItemClick(index, item)}
             aria-label={item.label}
@@ -193,7 +205,7 @@ export const MenuDock: React.FC<MenuDockProps> = ({
                 "flex items-center justify-center transition-all duration-200",
                 animated && isActive && "animate-bounce",
                 orientation === "horizontal" && showLabels ? "mb-1" : "",
-                orientation === "vertical" && showLabels ? "mb-1" : ""
+                orientation === "vertical" && showLabels ? "mb-1" : "",
               )}
             >
               <IconComponent
@@ -209,7 +221,7 @@ export const MenuDock: React.FC<MenuDockProps> = ({
                 className={cn(
                   "font-medium transition-colors duration-200 capitalize",
                   styles.text,
-                  "whitespace-nowrap"
+                  "whitespace-nowrap",
                 )}
               >
                 {item.label}
@@ -224,7 +236,7 @@ export const MenuDock: React.FC<MenuDockProps> = ({
         <div
           className={cn(
             "absolute bottom-2 h-0.5 bg-primary rounded-full transition-all duration-300 ease-out",
-            animated ? "transition-all duration-300" : ""
+            animated ? "transition-all duration-300" : "",
           )}
           style={{
             width: `${underlineWidth}px`,
@@ -240,7 +252,7 @@ export const MenuDock: React.FC<MenuDockProps> = ({
             "absolute bg-primary rounded-full transition-all duration-300",
             orientation === "vertical"
               ? "left-1 w-1 h-6"
-              : "bottom-0.5 h-0.5 w-6"
+              : "bottom-0.5 h-0.5 w-6",
           )}
           style={{
             [orientation === "vertical" ? "top" : "left"]:

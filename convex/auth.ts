@@ -11,12 +11,13 @@ const siteUrl = process.env.SITE_URL!;
 
 // The component client has methods needed for integrating Convex with Better Auth,
 // as well as helper methods for general use.
-export const authComponent = createClient<DataModel,typeof authSchema>(
-    components.betterAuth, {
-        local:{
-            schema:authSchema
-        }
-    }
+export const authComponent = createClient<DataModel, typeof authSchema>(
+  components.betterAuth,
+  {
+    local: {
+      schema: authSchema,
+    },
+  },
 );
 
 export const createAuth = (
@@ -49,9 +50,11 @@ export const allUsers = query({
   args: {},
   handler: async (ctx) => {
     const auth = await authComponent.getAuthUser(ctx);
-    const users = await ctx.runQuery(components.betterAuth.queries.getAllAuthUsers)
+    const users = await ctx.runQuery(
+      components.betterAuth.queries.getAllAuthUsers,
+    );
     if (!users) return [];
-    return users.filter(user => user._id !== auth._id)
+    return users.filter((user) => user._id !== auth._id);
   },
 });
 
@@ -60,4 +63,17 @@ export const getAuthUser = query({
   handler: async (ctx) => {
     return await authComponent.getAuthUser(ctx);
   },
-})
+});
+
+export const getAllUserSessions = query({
+  args: {},
+  handler: async (ctx) => {
+    const auth = await authComponent.getAuthUser(ctx);
+    const sessions = await ctx.runQuery(
+      components.betterAuth.queries.getAllUserSessions,
+      { userId: auth._id },
+    );
+    if (!sessions) return [];
+    return sessions;
+  },
+});

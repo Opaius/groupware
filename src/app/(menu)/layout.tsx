@@ -6,7 +6,7 @@ export default function MenuLayout({
 }) {
   return (
     <div className="flex flex-col h-screen">
-      <div className="flex-1 overflow-auto pb-24">{children}</div>
+      <div className="flex-1 overflow-auto">{children}</div>
       <NavigationMenu />
     </div>
   );

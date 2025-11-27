@@ -1018,6 +1018,22 @@ export declare const components: {
           userId?: null | string;
         }>
       >;
+      getAllUserSessions: FunctionReference<
+        "query",
+        "internal",
+        { userId: string },
+        Array<{
+          _creationTime: number;
+          _id: string;
+          createdAt: number;
+          expiresAt: number;
+          ipAddress?: null | string;
+          token: string;
+          updatedAt: number;
+          userAgent?: null | string;
+          userId: string;
+        }>
+      >;
     };
   };
 };

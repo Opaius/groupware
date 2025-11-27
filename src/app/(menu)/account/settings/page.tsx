@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth/auth-client";
 import { getInitials, getRandomColorBasedOnName } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { BackButton } from "@/components/back-button";
 
 const SettingsPage = () => {
   const [settings, setSettings] = useState({
@@ -50,13 +51,7 @@ const SettingsPage = () => {
     <div className="w-full h-full ">
       {/* Header with Profile */}
       <div className="bg-[#BDC7DB] pt-6 pb-16 px-4">
-        <Button
-          variant="ghost"
-          size="icon-lg"
-          className="mb-6 text-gray-700 hover:text-gray-900"
-        >
-          <ChevronRight className="size-8 rotate-180" />
-        </Button>
+        <BackButton />
 
         <div className="flex flex-col items-center">
           <Avatar className="w-24 h-24 border-4 border-[#4A6B8A]">
