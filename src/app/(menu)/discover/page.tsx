@@ -168,7 +168,6 @@ export default function DiscoverPage() {
           <X className="size-8" />
         </Button>
 
-<<<<<<<< HEAD:src/app/(menu)/discover/page.tsx
         <Button
           onClick={handleMessage}
           className="rounded-full size-16 hover:text-blue-800 hover:bg-blue-200"
@@ -187,7 +186,6 @@ export default function DiscoverPage() {
           <Handshake className="size-8" />
         </Button>
       </div>
-
 
       {showMatchModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
