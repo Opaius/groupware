@@ -187,9 +187,7 @@ export default function DiscoverPage() {
           <Handshake className="size-8" />
         </Button>
       </div>
-========
-      
->>>>>>>> 574d4433c75129b134c20bc1ab9050efc9c43b4b:apps/web/src/app/(menu)/discover/page.tsx
+
 
       {showMatchModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
