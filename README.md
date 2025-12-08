@@ -1,104 +1,36 @@
-# Groupware - Platformă Colaborativă
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Aceasta este documentația oficială pentru proiectul Groupware, o aplicație full-stack modernă construită pentru materia Groupware, cu suport pentru colaborare în timp real.
+## Getting Started
 
-## Arhitectură și Obiective
+First, run the development server:
 
-Proiectul este construit ca un Monorepo și cuprinde atât aplicația Next.js (Frontend și API Backend), cât și configurațiile bazelor de date. Această abordare asigură o sincronizare perfectă a tipurilor și dependențelor între toate componentele.
-
-## Caracteristici Principale
-
-- Sincronizare Real-Time: Socket.IO pentru gestionarea evenimentelor în timp real, notificări și mesagerie
-- Structură Modulară: App Router din Next.js cu rutare dinamică și rendering optimizat
-- Autentificare și Autorizare: BetterAuth pentru gestionarea utilizatorilor
-- ORM Type-Safe: Drizzle ORM pentru PostgreSQL cu validare Zod
-- State Management: Zustand pentru gestionarea stării aplicației
-
-## Cerințe Preliminare
-
-Înainte de a începe, asigurați-vă că aveți instalate următoarele:
-
-- Git - Controlul versiunilor
-- Bun - Runtime JavaScript rapid și manager de pachete (recomandat) sau Node.js 18+
-- Windsurf - IDE pentru dezvoltare full-stack cu ai integrat
-
-## Tool-uri și Librării Folosite
-
-| Tool / Librărie      | Scop                                          | Documentație                                                              |
-| -------------------- | --------------------------------------------- | ------------------------------------------------------------------------- |
-| Next.js              | Framework full-stack (client & server)        | https://nextjs.org / https://www.youtube.com/watch?v=ZjAqacIm9iI          |
-| Tailwind CSS         | Styling utility-first                         | https://tailwindcss.com / https://www.youtube.com/watch?v=ft30zcMlFbE     |
-| shadcn/ui            | Componente UI accesibile, bazate pe Radix     | https://ui.shadcn.com / https://www.youtube.com/watch?v=sIKKpnH1wFc       |
-| Drizzle ORM          | ORM de tip TypeScript-first pentru PostgreSQL | https://drizzle.org / https://www.youtube.com/watch?v=d1b_yqj3dVQ         |
-| Zod                  | Validarea tipurilor și a schemelor de date    | https://zod.dev / https://www.youtube.com/watch?v=L6BE-V2iiWs             |
-| Zustand              | Management de state ușor și rapid             | https://zustand.js.org / https://www.youtube.com/watch?v=RcHlzX0x6Go      |
-| TanStack React Query | Managementul datelor asincrone                | https://tanstack.com/query / https://www.youtube.com/watch?v=r8Dg0KVnfMA  |
-| React Hook Form      | Management simplificat al formularelor        | https://react-hook-form.com / https://www.youtube.com/watch?v=RkXv4AXXC_4 |
-| BetterAuth           | Soluție de autentificare și autorizare        | https://betterauth.dev / https://www.youtube.com/watch?v=eYV5R0oBQiE      |
-| Socket.IO            | Comunicare bi-direcțională, real-time         | https://socket.io / https://www.youtube.com/watch?v=1BfCnjr_Vjg           |
-
-## Securitate și Gestionarea Secretelor
-
-Pentru a asigura că variabilele sensibile de mediu (API Keys, parole DB) nu sunt comise în controlul versiunilor, urmăm practica standard de securitate:
-
-- Fișierul Public (.env.example): Acest fișier conține doar cheile variabilelor necesare (fără valori), servind ca șablon pentru ceilalți dezvoltatori. Acesta este comitat în Git.
-- Fișierul Secret (.env): Dezvoltatorii creează o copie a .env.example și o denumesc .env. Aici se completează valorile reale. Acesta este adăugat la .gitignore și nu se commitează.
-
-Pentru medii de producție, se recomandă utilizarea unor soluții enterprise de gestionare a secretelor (AWS Secrets Manager, HashiCorp Vault, Kubernetes Secrets).
-
-## Setup și Instalare
-
-### 1. Clonarea Repository-ului
-
-```
-git clone <link-repo>
-cd <nume-proiect>
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-### 2. Instalarea Dependențelor
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-Folosiți bun pentru instalarea rapidă a pachetelor:
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-```
-bun install
-```
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-Alternativ, cu npm:
+## Learn More
 
-```
-npm install
-```
+To learn more about Next.js, take a look at the following resources:
 
-### 3. Configurarea Variabilelor de Mediu
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-Copiați fișierul .env.example și redenumiti-l .env:
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-```
-cp .env.example .env
-```
+## Deploy on Vercel
 
-Structura completă a variabilelor de mediu va fi stabilită mai târziu în proiect.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-### 4. Configurarea Bazei de Date
-
-Baza de date PostgreSQL poate fi rulată local folosind Docker sau poți folosi o instanță PostgreSQL externă (hosted). Aceasta va fi stabilită mai târziu în proiect.
-
-Odată ce baza de date este configurată, aplicați migrațiile:
-
-```
-bun run db:migrate
-```
-
-### 5. Rulare Locală
-
-Porniți serverul de dezvoltare:
-
-```
-bun run dev
-```
-
-Aplicația va fi accesibilă pe http://localhost:3000.
-
-## Contribuții și Dezvoltare
-
-Sunteți încurajat să contribuiți la proiect. Vă rugăm să creați o cerere de pull pentru orice funcționalitate nouă sau remediere de bug-uri.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
