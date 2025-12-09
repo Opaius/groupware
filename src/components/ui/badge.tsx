@@ -1,8 +1,16 @@
+<<<<<<< HEAD:apps/web/src/components/ui/badge.tsx
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
+import { cva, type VariantProps } from "class-variance-authority"
+
+import { cn } from "@/lib/utils"
+=======
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
+>>>>>>> 699f86d8eca41eac36110935f9766bf6aad1ecd9:src/components/ui/badge.tsx
 
 const badgeVariants = cva(
   "inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden",
@@ -23,7 +31,11 @@ const badgeVariants = cva(
       variant: "default",
     },
   }
+<<<<<<< HEAD:apps/web/src/components/ui/badge.tsx
+)
+=======
 );
+>>>>>>> 699f86d8eca41eac36110935f9766bf6aad1ecd9:src/components/ui/badge.tsx
 
 function Badge({
   className,
@@ -32,7 +44,11 @@ function Badge({
   ...props
 }: React.ComponentProps<"span"> &
   VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
+<<<<<<< HEAD:apps/web/src/components/ui/badge.tsx
+  const Comp = asChild ? Slot : "span"
+=======
   const Comp = asChild ? Slot : "span";
+>>>>>>> 699f86d8eca41eac36110935f9766bf6aad1ecd9:src/components/ui/badge.tsx
 
   return (
     <Comp
@@ -40,7 +56,14 @@ function Badge({
       className={cn(badgeVariants({ variant }), className)}
       {...props}
     />
+<<<<<<< HEAD:apps/web/src/components/ui/badge.tsx
+  )
+}
+
+export { Badge, badgeVariants }
+=======
   );
 }
 
 export { Badge, badgeVariants };
+>>>>>>> 699f86d8eca41eac36110935f9766bf6aad1ecd9:src/components/ui/badge.tsx
