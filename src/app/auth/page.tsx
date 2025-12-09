@@ -21,7 +21,7 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
 
   return (
-    <div className="flex min-h-screen items-center justify-center overflow-hidden">
+    <div className="flex h-screen items-center justify-center overflow-hidden">
       <div className="w-full bg-white flex flex-col items-center transition-all duration-300">
         {/* Titlu */}
         <div className="pt-8 px-6 text-center">
@@ -148,7 +148,7 @@ function SignIn() {
         </FieldGroup>
       </form>
       {/* Forgot password */}
-      <div className="w-full max-w-[350px] mt-2">
+      <div className="w-full mt-2">
         <a
           href="#"
           className="block text-sm font-semibold text-[#6085B9] text-right mb-4"
@@ -163,7 +163,7 @@ function SignIn() {
       </p>
 
       {/* Social buttons */}
-      <div className="flex flex-col gap-2 w-full max-w-[350px]">
+      <div className="flex flex-col gap-2 w-full ">
         <Button variant="outline">
           <FaGoogle size={20} /> Login with Google
         </Button>
@@ -203,13 +203,14 @@ function SignUp() {
         password: value.password,
         callbackURL: "/chats",
       });
-      if (error) setError(error.message ?? "something went wrong");
-      else router.push("/chats");
+      if (error) {
+        setError(error.message ?? "something went wrong");
+      } else router.push("/chats");
     },
   });
 
   return (
-    <div className="w-full max-w-[350px]">
+    <div className="w-full">
       <form
         id="sign-up-form"
         onSubmit={(e) => {

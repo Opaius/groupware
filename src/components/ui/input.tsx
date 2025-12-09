@@ -16,7 +16,7 @@ function Input({
   type,
   icon,
   isPassword,
-  iconPosition,
+  iconPosition = "left",
   ...props
 }: InputProps) {
   const iconProps = {
@@ -31,7 +31,7 @@ function Input({
       data-slot="input"
       className={cn(
         "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive selection:bg-primary  dark:bg-input/30 border-input w-full min-w-0 rounded-md border bg-white! h-[50px]  py-1 shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-background  file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 flex items-center px-[10px] gap-[10px]",
-        iconPosition == "left" ? "flex-row" : "flex-row-reverse"
+        iconPosition == "left" ? "flex-row" : "flex-row-reverse",
       )}
     >
       {inputIcon}
@@ -41,7 +41,7 @@ function Input({
           "focus:border-transparent focus:outline-none focus:ring-0 file:text-foreground placeholder:text-muted-foreground selection:text-primary-foreground file:text-sm md:text-sm w-full",
           "",
           "",
-          className
+          className,
         )}
         {...props}
       />
