@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, LucideSearch } from "lucide-react";
 import { useQueryWithStatus } from "@/lib/utils";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "~/convex/_generated/api";
 import { ConversationCard } from "@/components/chat/conversation-card";
 import {
   Dialog,
@@ -20,7 +20,7 @@ export default function ConversationList() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { data, isPending } = useQueryWithStatus(
     api.chat.conversations.getConversationsWithMetadata,
-    { paginationOpts: { numItems: 10, cursor: null } }
+    { paginationOpts: { numItems: 10, cursor: null } },
   );
 
   const { data: allUsers } = useQueryWithStatus(api.auth.allUsers);
