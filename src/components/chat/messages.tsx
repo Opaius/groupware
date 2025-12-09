@@ -11,13 +11,18 @@ import { Id } from "../../../convex/_generated/dataModel";
 const useSeenMessage = (
   messageId: string,
   conversationId: string,
-  userId: string
+  userId: string,
 ) => {
   const ref = useRef(null);
   const markSeen = useMutation(api.chat.messages.markSeen);
 
   useEffect(() => {
     if (!ref.current) return;
+
+    // Skip temporary message IDs (optimistic messages)
+    if (messageId.startsWith("temp-")) {
+      return;
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -31,7 +36,7 @@ const useSeenMessage = (
           observer.disconnect();
         }
       },
-      { threshold: 0.5 } // 50% visible = seen
+      { threshold: 0.5 }, // 50% visible = seen
     );
 
     observer.observe(ref.current);
@@ -112,7 +117,7 @@ export function ChatMessage({
       ref={ref}
       className={cn(
         "flex w-full gap-2 ",
-        isOwnMessage ? "justify-end" : "justify-start"
+        isOwnMessage ? "justify-end" : "justify-start",
       )}
     >
       {/* Left Avatar (for others) */}
@@ -137,7 +142,7 @@ export function ChatMessage({
           "rounded-2xl",
           isOwnMessage
             ? "bg-primary text-primary-foreground rounded-br-none"
-            : "bg-muted text-foreground rounded-bl-none"
+            : "bg-muted text-foreground rounded-bl-none",
         )}
       >
         <p className="leading-relaxed whitespace-pre-wrap pb-1">{message}</p>
@@ -146,7 +151,7 @@ export function ChatMessage({
         <div
           className={cn(
             "flex items-center gap-1 text-2xs select-none opacity-80",
-            isOwnMessage ? "justify-end" : "justify-start"
+            isOwnMessage ? "justify-end" : "justify-start",
           )}
         >
           <span>{timeString}</span>

@@ -9,8 +9,9 @@ export default async function Layout({
 }) {
   // Get the authentication token for server-side requests
   const currentUser = await getUser();
-  console.log(currentUser);
-  // Fetch the current user with the authentication token
+  if (!currentUser) {
+    redirect("/auth");
+  }
 
   return <>{children}</>;
 }
