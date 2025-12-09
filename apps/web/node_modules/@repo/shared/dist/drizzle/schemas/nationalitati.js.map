@@ -1,0 +1,1 @@
+{"version":3,"file":"nationalitati.js","sourceRoot":"","sources":["../../../src/drizzle/schemas/nationalitati.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,IAAI,EAAE,MAAM,qBAAqB,CAAC;AAEpD,MAAM,CAAC,MAAM,aAAa,GAAG,OAAO,CAAC,eAAe,EAAE;IACpD,EAAE,EAAE,IAAI,CAAC,IAAI,CAAC,CAAC,UAAU,EAAE;IAC3B,IAAI,EAAE,IAAI,CAAC,MAAM,CAAC,CAAC,OAAO,EAAE;CAC7B,CAAC,CAAC"}
