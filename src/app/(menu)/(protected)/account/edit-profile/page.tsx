@@ -439,16 +439,6 @@ export default function ProfileScreenInteractive() {
           </div>
         </div>
       </div>
-
-      {/* 8. BARA DE NAVIGAȚIE INFERIOARĂ (Completată) */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-sm mx-auto h-16 bg-white border-t border-gray-300 shadow-lg flex justify-around items-center z-10">
-        <NavItem icon={Compass} label="Discover" isActive={false} />
-        <NavItem icon={Filter} label="Filter" isActive={false} />
-        <NavItem icon={MessageSquare} label="Chat" isActive={false} />
-        <NavItem icon={Bell} label="Notify" isActive={false} />
-        {/* Profilul este pagina curentă */}
-        <NavItem icon={User} label="Profile" isActive={true} />
-      </div>
-    </div>
+      ``    </div>
   );
 }

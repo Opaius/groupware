@@ -39,11 +39,11 @@ export default function ConversationList() {
               Chat +
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md!">
-            <DialogHeader>
+          <DialogContent className="max-w-md max-h-[80vh] overflow-hidden">
+            <DialogHeader className="border-b pb-4">
               <DialogTitle>Chat With People(testing)</DialogTitle>
             </DialogHeader>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 pr-2 overflow-y-auto max-h-[calc(80vh-100px)]">
               {allUsers?.map((user) => (
                 <AllUsersList
                   key={user._id}
