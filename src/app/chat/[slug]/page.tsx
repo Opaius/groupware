@@ -6,11 +6,7 @@ import {
   LucideCalendar,
   LucidePaperclip,
   LucideSend,
-  Phone,
-  Video,
   Loader2,
-  PhoneCall,
-  PhoneOff,
 } from "lucide-react";
 import { ChatMessage } from "@/components/chat/messages";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,7 +24,7 @@ import {
 } from "react";
 import { useMutation, useQuery, usePaginatedQuery } from "convex/react";
 import { useRouter } from "next/navigation";
-import { useCall } from "@/lib/client/useCall";
+import { CallControls } from "@/lib/call/components/CallControls";
 import { BackButton } from "@/components/back-button";
 import { usePeer } from "@/components/util/peerjs-provider";
 
@@ -59,17 +55,7 @@ export default function ChatPage({
   const { data: session } = authClient.useSession();
   const currentUserId = session?.user?.id ?? null;
 
-  const {
-    startCall,
-    acceptCall,
-    declineCall,
-    cancelCall,
-    callStatus,
-    incomingCall,
-    outgoingCall,
-    activeCall,
-    cleanupCall,
-  } = useCall();
+  // router and peer are kept for potential future use
   const router = useRouter();
   const peer = usePeer();
 
@@ -257,267 +243,17 @@ export default function ChatPage({
         </div>
 
         <div className="flex gap-1">
-          <Button
-            onClick={async (event: React.MouseEvent<HTMLButtonElement>) => {
-              console.log("Phone button clicked");
-              console.log("Calling user:", headerParticipant?.userId);
-              console.log("My peer ID:", peer?.id);
-
-              const receiverId = headerParticipant?.userId ?? "";
-              if (receiverId && peer) {
-                console.log("Starting call to:", receiverId);
-                console.log("My peer ID:", peer.id);
-                console.log("Conversation ID:", conversationId);
-
-                // Disable button immediately to prevent multiple clicks
-                const button = event.currentTarget as HTMLButtonElement;
-                button.disabled = true;
-
-                try {
-                  const success = await startCall(conversationId, receiverId);
-                  if (success) {
-                    // Navigate to call page immediately to show ringing UI
-                    router.push(`/chat/${conversationId}/call`);
-                  } else {
-                    console.error("Failed to start call");
-                    button.disabled = false;
-                  }
-                } catch (error) {
-                  console.error("Error starting call:", error);
-                  button.disabled = false;
-                }
-              } else {
-                console.error("Cannot start call:", {
-                  receiverId,
-                  peerAvailable: !!peer,
-                  peerId: peer?.id,
-                });
-              }
-            }}
-            variant="ghost"
-            size="icon"
-            disabled={
-              callStatus !== "idle" || !headerParticipant?.userId || !peer
-            }
-          >
-            <Phone className="size-5 " />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              console.log("Video call button clicked - not implemented yet");
-            }}
-          >
-            <Video className="size-5 " />
-          </Button>
-
-          {/* Debug button - manually navigate to call page */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              console.log("DEBUG: Manually navigating to call page");
-              console.log("Conversation ID:", conversationId);
-              console.log("Call status:", callStatus);
-              console.log("Has incoming call:", !!incomingCall);
-              console.log("Has outgoing call:", !!outgoingCall);
-              console.log("Has active call:", !!activeCall);
-
-              const targetPath = `/chat/${conversationId}/call`;
-              console.log("Navigating to:", targetPath);
-
-              // Try router first
-              router.push(targetPath);
-
-              // Fallback after 1 second
-              setTimeout(() => {
-                if (window.location.pathname !== targetPath) {
-                  console.log("Router failed, using window.location");
-                  window.location.href = targetPath;
-                }
-              }, 1000);
-            }}
-            title="Debug: Go to call page"
-            className="bg-yellow-500 hover:bg-yellow-600"
-          >
-            <span className="text-xs font-bold">DEBUG</span>
-          </Button>
+          {headerParticipant?.userId && (
+            <CallControls
+              conversationId={conversationId}
+              receiverId={headerParticipant.userId}
+              receiverName={headerProfile?.name}
+              receiverAvatar={headerProfile?.image || undefined}
+              variant="compact"
+            />
+          )}
         </div>
       </div>
-
-      {/* --- Incoming Call Overlay --- */}
-      {callStatus === "incoming" && incomingCall && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="bg-background rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
-            <div className="text-center space-y-6">
-              <div className="flex justify-center">
-                <div className="relative">
-                  <Avatar className="size-24 border-4 border-primary/20">
-                    <AvatarImage src={incomingCall.caller?.image ?? ""} />
-                    <AvatarFallback
-                      style={{
-                        backgroundColor: getRandomColorBasedOnName(
-                          incomingCall.caller?.name ?? "Caller",
-                        ),
-                      }}
-                    >
-                      {getInitials(incomingCall.caller?.name ?? "Caller")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="absolute -top-2 -right-2 animate-ping">
-                    <div className="size-12 rounded-full bg-primary/20 flex items-center justify-center">
-                      <PhoneCall className="size-6 text-primary" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold">Incoming Call</h2>
-                <p className="text-muted-foreground">
-                  {incomingCall.caller?.name ?? "Unknown"} is calling you
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Conversation:{" "}
-                  {incomingCall.conversation?.name ?? "Direct chat"}
-                </p>
-              </div>
-
-              <div className="flex justify-center gap-4 pt-4">
-                <Button
-                  onClick={declineCall}
-                  variant="destructive"
-                  size="lg"
-                  className="rounded-full size-16"
-                >
-                  <PhoneOff className="size-8" />
-                </Button>
-                <Button
-                  onClick={async () => {
-                    console.log("Accepting call from chat page");
-                    const success = await acceptCall();
-                    if (success) {
-                      console.log(
-                        "Call accepted successfully, global notification will handle navigation",
-                      );
-                      // Don't navigate here - let the global notification handle it
-                      // This prevents race conditions and premature navigation
-                    }
-                  }}
-                  variant="default"
-                  size="lg"
-                  className="rounded-full size-16 bg-green-600 hover:bg-green-700"
-                >
-                  <PhoneCall className="size-8" />
-                </Button>
-              </div>
-
-              <p className="text-sm text-muted-foreground pt-4">
-                Ringing... will auto-decline in 30 seconds
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* --- Outgoing Call Overlay --- */}
-      {(callStatus === "ringing" || outgoingCall) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="bg-background rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
-            <div className="text-center space-y-6">
-              <div className="flex justify-center">
-                <div className="relative">
-                  <Avatar className="size-24 border-4 border-primary/20">
-                    <AvatarImage src={headerProfile?.image ?? ""} />
-                    <AvatarFallback
-                      style={{
-                        backgroundColor: getRandomColorBasedOnName(headerName),
-                      }}
-                    >
-                      {getInitials(headerName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="absolute -top-2 -right-2 animate-ping">
-                    <div className="size-12 rounded-full bg-primary/20 flex items-center justify-center">
-                      <PhoneCall className="size-6 text-primary" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold">Calling...</h2>
-                <p className="text-muted-foreground">Calling {headerName}</p>
-                <p className="text-xs text-muted-foreground">
-                  {outgoingCall?.receiver?.name || "Connecting..."}
-                </p>
-              </div>
-
-              <div className="flex justify-center gap-4 pt-4">
-                <Button
-                  onClick={cancelCall}
-                  variant="destructive"
-                  size="lg"
-                  className="rounded-full size-16"
-                >
-                  <PhoneOff className="size-8" />
-                </Button>
-                <Button
-                  onClick={() => {
-                    // Navigate to call page to see call status
-                    router.push("/chat/" + conversationId + "/call");
-                  }}
-                  variant="outline"
-                  size="lg"
-                  className="rounded-full size-16"
-                >
-                  View Call
-                </Button>
-              </div>
-
-              <p className="text-sm text-muted-foreground pt-4">
-                Waiting for answer... will auto-cancel in 30 seconds
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* --- Call Ended Overlay --- */}
-      {callStatus === "ended" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-          <div className="bg-background rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
-            <div className="text-center space-y-6">
-              <div className="flex justify-center">
-                <div className="size-24 rounded-full bg-destructive/20 flex items-center justify-center">
-                  <PhoneOff className="size-12 text-destructive" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold">Call Ended</h2>
-                <p className="text-muted-foreground">
-                  {incomingCall ? "Call declined" : "Call cancelled"}
-                </p>
-              </div>
-
-              <div className="flex justify-center pt-4">
-                <Button
-                  onClick={() => {
-                    cleanupCall();
-                    router.push("/chat/" + conversationId);
-                  }}
-                  variant="outline"
-                  size="lg"
-                >
-                  Back to Chat
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* --- Messages Body --- */}
       <div
