@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, LucideSearch } from "lucide-react";
-import { useQueryWithStatus } from "@/lib/utils";
+import { useQueryWithStatus } from "@/lib/client-utils";
 import { api } from "~/convex/_generated/api";
 import { ConversationCard } from "@/components/chat/conversation-card";
 import {

@@ -24,9 +24,7 @@ import {
 } from "react";
 import { useMutation, useQuery, usePaginatedQuery } from "convex/react";
 import { useRouter } from "next/navigation";
-import { CallControls } from "@/lib/call/components/CallControls";
 import { BackButton } from "@/components/back-button";
-import { usePeer } from "@/components/util/peerjs-provider";
 
 // --- Types ---
 
@@ -56,8 +54,6 @@ export default function ChatPage({
   const currentUserId = session?.user?.id ?? null;
 
   // router and peer are kept for potential future use
-  const router = useRouter();
-  const peer = usePeer();
 
   // --- 1. Query Static Header Data (Conversation & Participants) ---
   const conversationData = useQuery(api.chat.messages.getConversationMetadata, {
@@ -240,18 +236,6 @@ export default function ChatPage({
               {conversationData ? "Active now" : "Loading..."}
             </p>
           </div>
-        </div>
-
-        <div className="flex gap-1">
-          {headerParticipant?.userId && (
-            <CallControls
-              conversationId={conversationId}
-              receiverId={headerParticipant.userId}
-              receiverName={headerProfile?.name}
-              receiverAvatar={headerProfile?.image || undefined}
-              variant="compact"
-            />
-          )}
         </div>
       </div>
 

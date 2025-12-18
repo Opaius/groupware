@@ -5,7 +5,7 @@ import { ChevronLeft, Shield, Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { authClient } from "@/lib/auth/auth-client";
-import { useQueryWithStatus } from "@/lib/utils";
+import { useQueryWithStatus } from "@/lib/client-utils";
 import { api } from "~/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";

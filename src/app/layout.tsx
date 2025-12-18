@@ -5,7 +5,6 @@ import { Poppins } from "next/font/google";
 import { ThemeProvider } from "@/components/util/theme-provider";
 import { ReactQueryProvider } from "@/components/util/query-provider";
 import { ConvexClientProvider } from "@/components/util/convex-provider";
-import { PeerProvider } from "@/components/util/peerjs-provider";
 
 import { Toaster } from "@/components/ui/sonner";
 export const metadata: Metadata = {
@@ -41,12 +40,10 @@ export default async function RootLayout({
             disableTransitionOnChange
           >
             <ConvexClientProvider>
-              <PeerProvider>
-                <div className="max-w-md w-full border box-content">
-                  {children}
-                  <Toaster />
-                </div>
-              </PeerProvider>
+              <div className="max-w-md w-full relative border box-content">
+                {children}
+                <Toaster />
+              </div>
             </ConvexClientProvider>
           </ThemeProvider>
         </ReactQueryProvider>
