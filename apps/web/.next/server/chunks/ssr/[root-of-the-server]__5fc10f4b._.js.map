@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 3, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
-    {"offset": {"line": 19, "column": 0}, "map": {"version":3,"sources":["file:///C:/Proiect/groupware2/groupware/apps/web/src/app/%28menu%29/chats/page.tsx"],"sourcesContent":["export default function Chats() {\r\n  return <div>Chats</div>;\r\n}\r\n"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACtB,qBAAO,mTAAC;kBAAI;;;;;;AACd","debugId":null}}]
-}
