@@ -100,7 +100,7 @@ const SettingsPage = () => {
           <Card className="shadow-sm border-gray-100">
             <CardContent className="p-0">
               <button className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <User className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex-1 text-left">
@@ -109,13 +109,13 @@ const SettingsPage = () => {
                     Update your profile information
                   </p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
               </button>
 
               <Separator />
 
               <button className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <Trophy className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex-1 text-left">
@@ -124,13 +124,13 @@ const SettingsPage = () => {
                     Manage your skills and tracking history
                   </p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
               </button>
 
               <Separator />
 
               <button className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <Shield className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex-1 text-left">
@@ -141,7 +141,7 @@ const SettingsPage = () => {
                     Manage two-factor authentication
                   </p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
               </button>
             </CardContent>
           </Card>
@@ -155,7 +155,7 @@ const SettingsPage = () => {
           <Card className="shadow-sm border-gray-100">
             <CardContent className="p-0">
               <button className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <Crown className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex-1 text-left">
@@ -166,7 +166,7 @@ const SettingsPage = () => {
                     Unlock premium features & pricing
                   </p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
               </button>
             </CardContent>
           </Card>
@@ -180,7 +180,7 @@ const SettingsPage = () => {
           <Card className="shadow-sm border-gray-100">
             <CardContent className="p-0">
               <div className="flex items-center gap-3 p-4">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <Bell className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex-1">
@@ -198,7 +198,7 @@ const SettingsPage = () => {
               <Separator />
 
               <div className="flex items-center gap-3 p-4">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <BellRing className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex-1">
@@ -218,7 +218,7 @@ const SettingsPage = () => {
               <Separator />
 
               <div className="flex items-center gap-3 p-4">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <Mail className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex-1">
@@ -246,7 +246,7 @@ const SettingsPage = () => {
           <Card className="shadow-sm border-gray-100">
             <CardContent className="p-0">
               <div className="flex items-center gap-3 p-4">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <Moon className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex-1">
@@ -272,7 +272,7 @@ const SettingsPage = () => {
           <Card className="shadow-sm border-gray-100">
             <CardContent className="p-0">
               <button className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <HelpCircle className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex-1 text-left">
@@ -281,13 +281,13 @@ const SettingsPage = () => {
                     Read FAQ and support articles
                   </p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
               </button>
 
               <Separator />
 
               <button className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <AlertCircle className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex-1 text-left">
@@ -296,13 +296,13 @@ const SettingsPage = () => {
                     Tell us about your problem
                   </p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
               </button>
 
               <Separator />
 
               <button className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <Info className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex-1 text-left">
@@ -311,7 +311,7 @@ const SettingsPage = () => {
                     App info & version
                   </p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
               </button>
             </CardContent>
           </Card>
@@ -331,7 +331,7 @@ const SettingsPage = () => {
                 }}
                 className="w-full flex items-center gap-3 p-4 hover:bg-gray-200 cursor-pointer transition"
               >
-                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
                   <LogOut className="w-5 h-5 text-red-600" />
                 </div>
                 <div className="flex-1 text-left">
@@ -340,13 +340,13 @@ const SettingsPage = () => {
                     Sign out of your account
                   </p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
               </button>
 
               <Separator />
 
               <button className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition">
-                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
                   <Trash2 className="w-5 h-5 text-red-600" />
                 </div>
                 <div className="flex-1 text-left">
@@ -355,7 +355,7 @@ const SettingsPage = () => {
                     Permanently delete your account
                   </p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
               </button>
             </CardContent>
           </Card>
