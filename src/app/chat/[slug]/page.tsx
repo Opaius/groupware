@@ -3,12 +3,9 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
-  ArrowLeft,
   LucideCalendar,
   LucidePaperclip,
   LucideSend,
-  Phone,
-  Video,
   Loader2,
 } from "lucide-react";
 import { ChatMessage } from "@/components/chat/messages";
@@ -27,7 +24,6 @@ import {
 } from "react";
 import { useMutation, useQuery, usePaginatedQuery } from "convex/react";
 import { useRouter } from "next/navigation";
-import { useCall } from "@/lib/client/useCall";
 import { BackButton } from "@/components/back-button";
 
 // --- Types ---
@@ -57,8 +53,7 @@ export default function ChatPage({
   const { data: session } = authClient.useSession();
   const currentUserId = session?.user?.id ?? null;
 
-  const { startCall } = useCall();
-  const router = useRouter();
+  // router and peer are kept for potential future use
 
   // --- 1. Query Static Header Data (Conversation & Participants) ---
   const conversationData = useQuery(api.chat.messages.getConversationMetadata, {
@@ -241,22 +236,6 @@ export default function ChatPage({
               {conversationData ? "Active now" : "Loading..."}
             </p>
           </div>
-        </div>
-
-        <div className="flex gap-1">
-          <Button
-            onClick={() => {
-              startCall(headerParticipant?.userId ?? "");
-              router.push("/chat/" + conversationId + "/call");
-            }}
-            variant="ghost"
-            size="icon"
-          >
-            <Phone className="size-5 " />
-          </Button>
-          <Button variant="ghost" size="icon">
-            <Video className="size-5 " />
-          </Button>
         </div>
       </div>
 

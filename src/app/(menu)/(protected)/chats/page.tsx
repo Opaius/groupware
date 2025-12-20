@@ -3,8 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, LucideSearch } from "lucide-react";
-import { useQueryWithStatus } from "@/lib/utils";
-import { api } from "../../../../convex/_generated/api";
+import { useQueryWithStatus } from "@/lib/client-utils";
+import { api } from "~/convex/_generated/api";
 import { ConversationCard } from "@/components/chat/conversation-card";
 import {
   Dialog,
@@ -20,7 +20,7 @@ export default function ConversationList() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { data, isPending } = useQueryWithStatus(
     api.chat.conversations.getConversationsWithMetadata,
-    { paginationOpts: { numItems: 10, cursor: null } }
+    { paginationOpts: { numItems: 10, cursor: null } },
   );
 
   const { data: allUsers } = useQueryWithStatus(api.auth.allUsers);
@@ -39,11 +39,11 @@ export default function ConversationList() {
               Chat +
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md!">
-            <DialogHeader>
+          <DialogContent className="max-w-md max-h-[80vh] overflow-hidden">
+            <DialogHeader className="border-b pb-4">
               <DialogTitle>Chat With People(testing)</DialogTitle>
             </DialogHeader>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 pr-2 overflow-y-auto max-h-[calc(80vh-100px)]">
               {allUsers?.map((user) => (
                 <AllUsersList
                   key={user._id}

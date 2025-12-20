@@ -1,3 +1,3 @@
-import { nextJsHandler } from "@convex-dev/better-auth/nextjs";
+import { nextJsHandlerCustom } from "./(custom-handler)";
 
-export const { GET, POST } = nextJsHandler();
+export const { GET, POST } = nextJsHandlerCustom();
