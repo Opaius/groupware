@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -23,20 +19,8 @@
       }
     ],
     "paths": {
-<<<<<<< HEAD
-<<<<<<< HEAD
       "@/*": ["./src/*"],
       "~/*": ["./*"]
-=======
-      "@/*": [
-        "./src/*"
-      ]
->>>>>>> 8ae8bc38 (Update pagina planta and others)
-=======
-      "@/*": [
-        "./src/*"
-      ]
->>>>>>> 8ae8bc386bd5c3b92a0722d41fd5a9dae63a62a7
     }
   },
   "include": [
@@ -45,10 +29,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "../../packages/shared/src/drizzle/schemas/auth-schema.ts",
-    "../../packages/shared/src/drizzle/schemas/auth-schema.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

@@ -12,12 +12,12 @@ const menuItems: MenuDockItem[] = [
   { label: "Filter", icon: LucideFilter, link: "/filter" },
   { label: "Chat", icon: LucideMessageCircle, link: "/chats" },
   { label: "Notify", icon: LucideBell, link: "/notify" },
-  { label: "Profile", icon: LucideUser, link: "/account" },
+  { label: "Profile", icon: LucideUser, link: "/account/settings" },
 ];
 const pathnameMaps: { [key: string]: string[] } = {
   "/": ["/", "/discover", "/home"],
   "/chats": ["/chat/*", "/chats"],
-  "/account": ["/account/*", "/account", "/privacy-and-security"],
+  "/account/settings": ["/account/*", "/account", "/privacy-and-security"],
 };
 export function NavigationMenu() {
   return (
