@@ -8,6 +8,8 @@ import authSchema from "./betterAuth/schema";
 
 const siteUrl = process.env.SITE_URL || "http://localhost:3000";
 
+console.log(siteUrl);
+
 export const authComponent = createClient<DataModel, typeof authSchema>(
   components.betterAuth,
   {
@@ -24,15 +26,23 @@ export const createAuth = (
   return betterAuth({
     baseURL: siteUrl,
     database: authComponent.adapter(ctx),
-    // Configure simple, non-verified email/password to get started
+    user: {
+      additionalFields: {
+        hasSeenOnboarding: {
+          type: "boolean",
+          defaultValue: false,
+        },
+        hasFinishedCreateAccount: {
+          type: "boolean",
+          defaultValue: false,
+        },
+      },
+    },
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
     },
-    plugins: [
-      // The Convex plugin is required for Convex compatibility
-      convex(),
-    ],
+    plugins: [convex()],
   });
 };
 

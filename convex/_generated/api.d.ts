@@ -9,7 +9,6 @@
  */
 
 import type * as auth from "../auth.js";
-import type * as chat_calls from "../chat/calls.js";
 import type * as chat_conversations from "../chat/conversations.js";
 import type * as chat_messages from "../chat/messages.js";
 import type * as http from "../http.js";
@@ -23,7 +22,6 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
-  "chat/calls": typeof chat_calls;
   "chat/conversations": typeof chat_conversations;
   "chat/messages": typeof chat_messages;
   http: typeof http;
@@ -69,6 +67,7 @@ export declare const components: {
                   createdAt: number;
                   email: string;
                   emailVerified: boolean;
+                  hasSeenOnboarding: boolean;
                   image?: null | string;
                   name: string;
                   updatedAt: number;
@@ -145,6 +144,7 @@ export declare const components: {
                     | "createdAt"
                     | "updatedAt"
                     | "userId"
+                    | "hasSeenOnboarding"
                     | "_id";
                   operator?:
                     | "lt"
@@ -327,6 +327,7 @@ export declare const components: {
                     | "createdAt"
                     | "updatedAt"
                     | "userId"
+                    | "hasSeenOnboarding"
                     | "_id";
                   operator?:
                     | "lt"
@@ -569,6 +570,7 @@ export declare const components: {
                   createdAt?: number;
                   email?: string;
                   emailVerified?: boolean;
+                  hasSeenOnboarding?: boolean;
                   image?: null | string;
                   name?: string;
                   updatedAt?: number;
@@ -584,6 +586,7 @@ export declare const components: {
                     | "createdAt"
                     | "updatedAt"
                     | "userId"
+                    | "hasSeenOnboarding"
                     | "_id";
                   operator?:
                     | "lt"
@@ -795,6 +798,7 @@ export declare const components: {
                   createdAt?: number;
                   email?: string;
                   emailVerified?: boolean;
+                  hasSeenOnboarding?: boolean;
                   image?: null | string;
                   name?: string;
                   updatedAt?: number;
@@ -810,6 +814,7 @@ export declare const components: {
                     | "createdAt"
                     | "updatedAt"
                     | "userId"
+                    | "hasSeenOnboarding"
                     | "_id";
                   operator?:
                     | "lt"
@@ -1014,6 +1019,7 @@ export declare const components: {
           createdAt: number;
           email: string;
           emailVerified: boolean;
+          hasSeenOnboarding: boolean;
           image?: null | string;
           name: string;
           updatedAt: number;

@@ -204,8 +204,8 @@ export default function ProfileScreenInteractive() {
   // --- JSX de Randare ---
 
   return (
-    <div className="flex min-h-screen justify-center bg-gray-50 pb-20">
-      <div className="w-full max-w-sm bg-background shadow-xl overflow-y-auto relative">
+    <div className="flex justify-center bg-gray-50">
+      <div className="w-full bg-background shadow-xl overflow-y-auto relative">
         {/* Banner */}
         <div
           className="h-64 w-full bg-cover bg-center relative"
@@ -439,6 +439,6 @@ export default function ProfileScreenInteractive() {
           </div>
         </div>
       </div>
-      ``    </div>
+    </div>
   );
 }

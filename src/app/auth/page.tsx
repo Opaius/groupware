@@ -1,7 +1,8 @@
 /* eslint-disable react/no-children-prop */
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
+import gsap from "gsap";
 import { LucideLock, LucideMail, LucideUser } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,12 +21,18 @@ import { useRouter } from "next/navigation";
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
 
+  const handleToggle = (login: boolean) => {
+    if (login !== isLogin) {
+      setIsLogin(login);
+    }
+  };
+
   return (
     <div className="flex h-screen items-center justify-center overflow-hidden">
-      <div className="w-full bg-white flex flex-col items-center transition-all duration-300">
+      <div className="w-full h-full bg-white grid grid-rows-[1fr_auto] items-center transition-all duration-300">
         {/* Titlu */}
         <div className="pt-8 px-6 text-center">
-          <h1 className="font-poppins font-bold text-2xl sm:text-4xl leading-snug bg-linear-to-b from-primary to-secondary bg-clip-text text-transparent">
+          <h1 className="font-poppins font-bold text-2xl sm:text-4xl leading-snug gradient-text">
             {isLogin ? "Welcome to Skill Trade" : "Create your account"}
           </h1>
           {isLogin && (
@@ -35,34 +42,39 @@ export default function AuthPage() {
           )}
         </div>
 
-        {/* Butoane Login / SignUp */}
-        <div className="flex w-full mt-6 text-[1.1rem] sm:text-[1.2rem] font-semibold">
-          <button
-            onClick={() => setIsLogin(true)}
-            className={`flex-1 py-3 sm:py-4 ${
-              isLogin ? "bg-[#DCE9FB]" : "bg-white"
-            }`}
-          >
-            Login
-          </button>
-          <button
-            onClick={() => setIsLogin(false)}
-            className={`flex-1 py-3 sm:py-4 ${
-              !isLogin ? "bg-[#DCE9FB]" : "bg-white"
-            }`}
-          >
-            Sign Up
-          </button>
-        </div>
+        <div className="w-full ">
+          {/* Butoane Login / SignUp */}
+          <div className="flex w-full mt-6 font-semibold">
+            <button
+              onClick={() => handleToggle(true)}
+              className={`flex-1 py-3 sm:py-4 ${
+                isLogin ? "bg-accent-light" : "bg-white"
+              }`}
+            >
+              Login
+            </button>
+            <button
+              onClick={() => handleToggle(false)}
+              className={`flex-1 py-3 sm:py-4 ${
+                !isLogin ? "bg-accent-light" : "bg-white"
+              }`}
+            >
+              Sign Up
+            </button>
+          </div>
 
-        {/* Formular */}
-        <div className="flex-1 w-full bg-[#DCE9FB] flex flex-col items-center px-6 py-8">
-          {isLogin ? <SignIn /> : <SignUp />}
+          {/* Formular */}
+          <div
+
+            className="flex-1 w-full h-max bg-accent-light flex flex-col items-center px-6 py-8"
+          >
+            {isLogin ? <SignIn /> : <SignUp />}
+          </div>
         </div>
       </div>
     </div>
   );
-}
+
 function SignIn() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -85,96 +97,102 @@ function SignIn() {
     },
   });
   return (
-    <div>
-      <form
-        id="sign-in-form"
-        onSubmit={(e) => {
-          e.preventDefault();
-          form.handleSubmit();
-        }}
-      >
-        <FieldGroup className="gap-[10px]">
-          <form.Field
-            name="email"
-            children={(field) => {
-              const isInvalid = !field.state.meta.isValid;
-              return (
-                <Field data-invalid={isInvalid}>
-                  <Input
-                    id={field.name}
-                    type="email"
-                    name={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    aria-invalid={isInvalid}
-                    placeholder="Email"
-                    autoComplete="off"
-                    icon={<LucideMail />}
-                  ></Input>
-                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                </Field>
-              );
-            }}
-          />
-          <form.Field
-            name="password"
-            children={(field) => {
-              const isInvalid = !field.state.meta.isValid;
-              return (
-                <Field data-invalid={isInvalid}>
-                  <Input
-                    id={field.name}
-                    type="password"
-                    name={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    aria-invalid={isInvalid}
-                    placeholder="Password"
-                    autoComplete="off"
-                    icon={<LucideLock />}
-                    isPassword
-                  ></Input>
-                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                </Field>
-              );
-            }}
-          />
-          <Button variant="secondary" type="submit" className="w-full">
-            Login
-          </Button>
-          {error && <p className="text-red-500">{error}</p>}
-        </FieldGroup>
-      </form>
-      {/* Forgot password */}
-      <div className="w-full mt-2">
-        <a
-          href="#"
-          className="block text-sm font-semibold text-[#6085B9] text-right mb-4"
+    <div className="h-full flex flex-col ">
+      <div className="my-auto">
+        <form
+          id="sign-in-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
         >
-          Forgot password?
-        </a>
-      </div>
+          <FieldGroup className="gap-[10px]">
+            <form.Field
+              name="email"
+              children={(field) => {
+                const isInvalid = !field.state.meta.isValid;
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <Input
+                      id={field.name}
+                      type="email"
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      placeholder="Email"
+                      autoComplete="off"
+                      icon={<LucideMail />}
+                    ></Input>
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
+            />
+            <form.Field
+              name="password"
+              children={(field) => {
+                const isInvalid = !field.state.meta.isValid;
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <Input
+                      id={field.name}
+                      type="password"
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      placeholder="Password"
+                      autoComplete="off"
+                      icon={<LucideLock />}
+                      isPassword
+                    ></Input>
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                );
+              }}
+            />
+            <Button variant="secondary" type="submit" className="w-full">
+              Login
+            </Button>
+            {error && <p className="text-red-500">{error}</p>}
+          </FieldGroup>
+        </form>
+        {/* Forgot password */}
+        <div className="w-full mt-2">
+          <a
+            href="#"
+            className="block text-sm font-semibold auth-link text-right mb-4"
+          >
+            Forgot password?
+          </a>
+        </div>
 
-      {/* Or continue with social */}
-      <p className="text-center text-sm text-gray-700 my-4">
-        Or continue with social
-      </p>
+        {/* Or continue with social */}
+        <p className="text-center text-sm auth-social-text my-4">
+          Or continue with social
+        </p>
 
-      {/* Social buttons */}
-      <div className="flex flex-col gap-2 w-full ">
-        <Button variant="outline">
-          <FaGoogle size={20} /> Login with Google
-        </Button>
+        {/* Social buttons */}
+        <div className="flex flex-col gap-2 w-full ">
+          <Button variant="outline">
+            <FaGoogle size={20} /> Login with Google
+          </Button>
 
-        <Button variant="outline">
-          <FaApple size={20} /> Login with Apple
-        </Button>
+          <Button variant="outline">
+            <FaApple size={20} /> Login with Apple
+          </Button>
+        </div>
       </div>
 
       {/* Footer */}
-      <p className="text-center text-xs text-gray-500 mt-6 px-4">
+      <p className="text-center text-xs auth-social-text mt-6 px-4">
         By signing in with an account, you agree to SO&apos;s Terms of Service
         and Privacy Policy.
       </p>
@@ -210,7 +228,7 @@ function SignUp() {
   });
 
   return (
-    <div className="w-full">
+    <div className="w-full my-auto">
       <form
         id="sign-up-form"
         onSubmit={(e) => {
@@ -358,7 +376,7 @@ function SignUp() {
         {/* Error Message */}
         {error && <p className="text-sm text-destructive mt-2">{error}</p>}
         {/* Social Sign Up Section */}
-        <p className="text-center text-sm text-gray-700 my-2">
+        <p className="text-center text-sm auth-social-text my-2">
           Or sign up with
         </p>
         <div className="flex flex-col gap-2">
