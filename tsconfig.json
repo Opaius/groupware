@@ -24,6 +24,7 @@
     ],
     "paths": {
 <<<<<<< HEAD
+<<<<<<< HEAD
       "@/*": ["./src/*"],
       "~/*": ["./*"]
 =======
@@ -31,6 +32,11 @@
         "./src/*"
       ]
 >>>>>>> 8ae8bc38 (Update pagina planta and others)
+=======
+      "@/*": [
+        "./src/*"
+      ]
+>>>>>>> 8ae8bc386bd5c3b92a0722d41fd5a9dae63a62a7
     }
   },
   "include": [
