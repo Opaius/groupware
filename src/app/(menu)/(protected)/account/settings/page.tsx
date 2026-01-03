@@ -334,58 +334,24 @@ const SettingsPage = () => {
           </p>
           <Card className="shadow-sm border-gray-100">
             <CardContent className="p-0">
-              <AlertDialog>
-                {/* asChild allows the Trigger to pass behavior to your custom button
-                        instead of rendering a button-inside-a-button */}
-                <AlertDialogTrigger asChild>
-                  <button className="w-full flex items-center gap-3 p-4 hover:bg-gray-200 cursor-pointer transition rounded-lg outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-100">
-                    <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                      <LogOut className="w-5 h-5 text-red-600" />
-                    </div>
-                    <div className="flex-1 text-left">
-                      <p className="font-medium text-gray-900">Log Out</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Sign out of your account
-                      </p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
-                  </button>
-                </AlertDialogTrigger>
-
-                <AlertDialogContent className="w-[90%] max-w-[400px] p-8 bg-[#ECF4FF] rounded-[30px] border-none shadow-xl">
-                  <AlertDialogHeader className="flex flex-col items-center text-center gap-2">
-                    <AlertDialogTitle
-                      className="text-[20px] font-poppins font-semibold text-gray-900"
-                      style={{ textShadow: "0px 4px 4px rgba(0, 0, 0, 0.1)" }}
-                    >
-                      Are you sure you want to log out?
-                    </AlertDialogTitle>
-
-                    <AlertDialogDescription className="text-[#1A76C3] text-[13px] font-poppins leading-relaxed max-w-[260px]">
-                      You can always sign back in anytime. Your account will
-                      remain secure.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-
-                  <AlertDialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-center gap-3 mt-6 w-full">
-                    {/* Cancel Button */}
-                    <AlertDialogCancel className="mt-0 w-full sm:w-auto min-w-[120px] h-[40px] bg-white border border-gray-400/50 rounded-lg shadow-sm text-[#1A76C3] font-normal hover:bg-gray-50 transition-colors">
-                      Cancel
-                    </AlertDialogCancel>
-
-                    {/* Action Button */}
-                    <AlertDialogAction
-                      onClick={() => {
-                        authClient.signOut();
-                        router.push("/discover");
-                      }}
-                      className="w-full sm:w-auto min-w-[120px] h-[40px] bg-white border border-red-200 rounded-lg shadow-sm text-[#C3201A] font-normal hover:bg-red-50 hover:border-red-300 transition-colors"
-                    >
-                      Log out
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <button
+                onClick={() => {
+                  authClient.signOut();
+                  router.push("/discover");
+                }}
+                className="w-full flex items-center gap-3 p-4 hover:bg-gray-200 cursor-pointer transition"
+              >
+                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                  <LogOut className="w-5 h-5 text-red-600" />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-medium text-gray-900">Log Out</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Sign out of your account
+                  </p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
+              </button>
 
               <Separator />
 
