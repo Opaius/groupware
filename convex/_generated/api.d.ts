@@ -12,6 +12,7 @@ import type * as auth from "../auth.js";
 import type * as chat_conversations from "../chat/conversations.js";
 import type * as chat_messages from "../chat/messages.js";
 import type * as http from "../http.js";
+import type * as skills_skills from "../skills/skills.js";
 import type * as utils from "../utils.js";
 
 import type {
@@ -25,6 +26,7 @@ declare const fullApi: ApiFromModules<{
   "chat/conversations": typeof chat_conversations;
   "chat/messages": typeof chat_messages;
   http: typeof http;
+  "skills/skills": typeof skills_skills;
   utils: typeof utils;
 }>;
 
