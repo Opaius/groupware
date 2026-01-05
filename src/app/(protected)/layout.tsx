@@ -1,13 +1,17 @@
-import { NavigationMenu } from "@/components/menu/navigationMenu";
-export default function MenuLayout({
+import { redirect } from "next/navigation";
+
+import { getUser } from "@/lib/auth/server-actions";
+
+export default async function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="flex flex-col h-screen">
-      <div className="flex-1 overflow-auto">{children}</div>
-      <NavigationMenu />
-    </div>
-  );
+  // Get the authentication token for server-side requests
+  const currentUser = await getUser();
+  if (!currentUser) {
+    redirect("/auth");
+  }
+
+  return <>{children}</>;
 }

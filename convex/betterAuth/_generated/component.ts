@@ -34,7 +34,8 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                   createdAt: number;
                   email: string;
                   emailVerified: boolean;
-                  hasSeenOnboarding: boolean;
+                  hasFinishedCreateAccount?: null | boolean;
+                  hasSeenOnboarding?: null | boolean;
                   image?: null | string;
                   name: string;
                   updatedAt: number;
@@ -113,6 +114,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "updatedAt"
                     | "userId"
                     | "hasSeenOnboarding"
+                    | "hasFinishedCreateAccount"
                     | "_id";
                   operator?:
                     | "lt"
@@ -297,6 +299,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "updatedAt"
                     | "userId"
                     | "hasSeenOnboarding"
+                    | "hasFinishedCreateAccount"
                     | "_id";
                   operator?:
                     | "lt"
@@ -542,7 +545,8 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                   createdAt?: number;
                   email?: string;
                   emailVerified?: boolean;
-                  hasSeenOnboarding?: boolean;
+                  hasFinishedCreateAccount?: null | boolean;
+                  hasSeenOnboarding?: null | boolean;
                   image?: null | string;
                   name?: string;
                   updatedAt?: number;
@@ -559,6 +563,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "updatedAt"
                     | "userId"
                     | "hasSeenOnboarding"
+                    | "hasFinishedCreateAccount"
                     | "_id";
                   operator?:
                     | "lt"
@@ -771,7 +776,8 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                   createdAt?: number;
                   email?: string;
                   emailVerified?: boolean;
-                  hasSeenOnboarding?: boolean;
+                  hasFinishedCreateAccount?: null | boolean;
+                  hasSeenOnboarding?: null | boolean;
                   image?: null | string;
                   name?: string;
                   updatedAt?: number;
@@ -788,6 +794,7 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
                     | "updatedAt"
                     | "userId"
                     | "hasSeenOnboarding"
+                    | "hasFinishedCreateAccount"
                     | "_id";
                   operator?:
                     | "lt"
@@ -993,7 +1000,8 @@ export type ComponentApi<Name extends string | undefined = string | undefined> =
           createdAt: number;
           email: string;
           emailVerified: boolean;
-          hasSeenOnboarding: boolean;
+          hasFinishedCreateAccount?: null | boolean;
+          hasSeenOnboarding?: null | boolean;
           image?: null | string;
           name: string;
           updatedAt: number;

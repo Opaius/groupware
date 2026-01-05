@@ -1,3 +1,4 @@
+import type { Viewport } from "next";
 import { NavigationMenu } from "@/components/menu/navigationMenu";
 export default function MenuLayout({
   children,

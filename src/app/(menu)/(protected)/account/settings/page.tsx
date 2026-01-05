@@ -37,6 +37,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import Link from "next/link";
 
 const SettingsPage = () => {
   const [settings, setSettings] = useState({
@@ -109,7 +110,10 @@ const SettingsPage = () => {
           </p>
           <Card className="shadow-sm border-gray-100">
             <CardContent className="p-0">
-              <button className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition">
+              <Link
+                href="/account/edit-profile"
+                className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition"
+              >
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <User className="w-5 h-5 text-blue-600" />
                 </div>
@@ -120,11 +124,14 @@ const SettingsPage = () => {
                   </p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
-              </button>
+              </Link>
 
               <Separator />
 
-              <button className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition">
+              <Link
+                href="/skill-history"
+                className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition"
+              >
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <Trophy className="w-5 h-5 text-blue-600" />
                 </div>
@@ -135,11 +142,14 @@ const SettingsPage = () => {
                   </p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
-              </button>
+              </Link>
 
               <Separator />
 
-              <button className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition">
+              <Link
+                href="/privacy-and-security"
+                className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition"
+              >
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <Shield className="w-5 h-5 text-blue-600" />
                 </div>
@@ -152,7 +162,7 @@ const SettingsPage = () => {
                   </p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
-              </button>
+              </Link>
             </CardContent>
           </Card>
         </div>
@@ -281,7 +291,10 @@ const SettingsPage = () => {
           </p>
           <Card className="shadow-sm border-gray-100">
             <CardContent className="p-0">
-              <button className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition">
+              <Link
+                href="/help-center"
+                className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition"
+              >
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <HelpCircle className="w-5 h-5 text-blue-600" />
                 </div>
@@ -292,7 +305,7 @@ const SettingsPage = () => {
                   </p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
-              </button>
+              </Link>
 
               <Separator />
 
@@ -355,7 +368,10 @@ const SettingsPage = () => {
 
               <Separator />
 
-              <button className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition">
+              <Link
+                href="/account/delete"
+                className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition"
+              >
                 <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
                   <Trash2 className="w-5 h-5 text-red-600" />
                 </div>
@@ -366,7 +382,7 @@ const SettingsPage = () => {
                   </p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
-              </button>
+              </Link>
             </CardContent>
           </Card>
         </div>

@@ -43,4 +43,25 @@ export default defineSchema({
   })
     .index("by_key", ["key"])
     .index("by_conv", ["conversationId"]),
+  skillCategory: defineTable({
+    name: v.string(),
+    icon: v.optional(v.string()),
+  }),
+  skill: defineTable({
+    name: v.string(),
+    icon: v.optional(v.string()),
+    categoryId: v.id("skillCategory"),
+  })
+    .searchIndex("search_skill", {
+      searchField: "name",
+      staged: false,
+    })
+    .index("by_category", ["categoryId"]),
+  userSkills: defineTable({
+    userId: v.string(),
+    skillId: v.id("skill"),
+    description: v.string(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_skill", ["skillId"]),
 });
