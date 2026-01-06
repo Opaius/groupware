@@ -1,0 +1,1085 @@
+"use client";
+
+import React, { useState } from "react";
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+interface FormData {
+  bio: string;
+  selectedSkills: {
+    tech: string[];
+    creative: string[];
+  };
+  skills: string[];
+  specialization: string;
+  skillName: string;
+  description: string;
+  link: string;
+}
+
+interface ProfileStepProps {
+  formData: FormData;
+  updateFormData: (data: FormData) => void;
+}
+
+interface SkillSelectionStepProps {
+  formData: FormData;
+  updateFormData: (data: FormData) => void;
+}
+
+interface SpecializationStepProps {
+  formData: FormData;
+  updateFormData: (data: FormData) => void;
+}
+
+interface SkillAttributionStepProps {
+  formData: FormData;
+  updateFormData: (data: FormData) => void;
+}
+
+// ============================================================================
+// REUSABLE COMPONENTS & ICONS
+// ============================================================================
+
+const BrandLogo = () => (
+  <div style={{ width: 122, height: 66, position: "relative" }}>
+    <img
+      src="/logo.png"
+      alt="Skill Trade Logo"
+      style={{
+        width: "100%",
+        height: "100%",
+        objectFit: "contain",
+      }}
+    />
+  </div>
+);
+
+const BackArrowIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#1D324E"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M19 12H5" />
+    <path d="M12 19L5 12L12 5" />
+  </svg>
+);
+
+const PlusIcon = () => (
+  <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M18 4.5C18.4 4.5 18.8 4.7 19.1 4.9C19.3 5.2 19.5 5.6 19.5 6V30C19.5 30.4 19.3 30.8 19.1 31.1C18.8 31.3 18.4 31.5 18 31.5C17.6 31.5 17.2 31.3 16.9 31.1C16.7 30.8 16.5 30.4 16.5 30V6C16.5 5.6 16.7 5.2 16.9 4.9C17.2 4.7 17.6 4.5 18 4.5Z"
+      fill="#1D324E"
+    />
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M31.5 18C31.5 18.4 31.3 18.8 31.1 19.1C30.8 19.3 30.4 19.5 30 19.5H6C5.6 19.5 5.2 19.3 4.9 19.1C4.7 18.8 4.5 18.4 4.5 18C4.5 17.6 4.7 17.2 4.9 16.9C5.2 16.7 5.6 16.5 6 16.5H30C30.4 16.5 30.8 16.7 31.1 16.9C31.3 17.2 31.5 17.6 31.5 18Z"
+      fill="#1D324E"
+    />
+  </svg>
+);
+
+const PaperClipIcon = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#5A6B89"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+  </svg>
+);
+
+const SendPlaneIcon = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#5A6B89"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="22" y1="2" x2="11" y2="13"></line>
+    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+  </svg>
+);
+
+// ============================================================================
+// STEP 1: PROFILE COMPLETION
+// ============================================================================
+
+const ProfileStep = ({ formData, updateFormData }: ProfileStepProps) => {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "30px",
+        padding: "0 25px",
+      }}
+    >
+      {/* MAIN PHOTO SECTION */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <h3
+          style={{
+            color: "#1D324E",
+            fontSize: 20,
+            fontWeight: 600,
+            marginBottom: 8,
+            marginTop: 0,
+          }}
+        >
+          Add a Main Photo
+        </h3>
+        <p
+          style={{
+            color: "#496995",
+            fontSize: 12,
+            fontWeight: 400,
+            textAlign: "center",
+            marginBottom: 15,
+            maxWidth: 300,
+          }}
+        >
+          This image will appear at the top of your profile — make it stand out!
+        </p>
+
+        <div
+          style={{
+            width: 100,
+            height: 100,
+            background: "rgba(147, 198, 231, 0.96)",
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
+          }}
+          onClick={() => {
+            /* Handle photo upload */
+          }}
+        >
+          <PlusIcon />
+        </div>
+      </div>
+
+      {/* FEATURED IMAGE SECTION */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <h3
+          style={{
+            color: "#1D324E",
+            fontSize: 20,
+            fontWeight: 600,
+            marginBottom: 8,
+            marginTop: 0,
+          }}
+        >
+          Upload a Featured Image
+        </h3>
+        <p
+          style={{
+            color: "#496995",
+            fontSize: 12,
+            fontWeight: 400,
+            textAlign: "center",
+            marginBottom: 15,
+            maxWidth: 300,
+          }}
+        >
+          Choose a photo that represents your skills, work, or personality.
+        </p>
+
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 348,
+            height: 89,
+            background: "rgba(147, 198, 231, 0.35)",
+            borderRadius: 10,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            border: "1px dashed rgba(29, 50, 78, 0.2)",
+          }}
+          onClick={() => {
+            /* Handle featured image upload */
+          }}
+        >
+          <PlusIcon />
+        </div>
+      </div>
+
+      {/* BIO SECTION */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <h3
+          style={{
+            color: "#1D324E",
+            fontSize: 20,
+            fontWeight: 600,
+            marginBottom: 8,
+            marginTop: 0,
+          }}
+        >
+          Add a Short Bio
+        </h3>
+        <p
+          style={{
+            color: "#496995",
+            fontSize: 12,
+            fontWeight: 400,
+            textAlign: "center",
+            marginBottom: 15,
+            lineHeight: "1.5",
+          }}
+        >
+          Tell us a bit about yourself — your background, passions, and what
+          drives you. Write a short description of your key strengths,
+          expertise, and experience.
+        </p>
+
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 348,
+            height: 127,
+            background: "rgba(139, 154, 183, 0.20)",
+            borderRadius: 10,
+            padding: "24px",
+            boxSizing: "border-box",
+          }}
+        >
+          <textarea
+            placeholder="Your words..."
+            value={formData.bio || ""}
+            onChange={(e) =>
+              updateFormData({ ...formData, bio: e.target.value })
+            }
+            style={{
+              width: "100%",
+              height: "100%",
+              background: "transparent",
+              border: "none",
+              outline: "none",
+              resize: "none",
+              color: "#1D324E",
+              fontSize: 14,
+              fontFamily: "'Roboto', sans-serif",
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================================================
+// STEP 2: SKILL SELECTION
+// ============================================================================
+
+const techSkills = [
+  { title: "Web Development", img: "iconita.png" },
+  { title: "Software Testing", img: "iconita.png" },
+  { title: "Cloud Computing", img: "iconita.png" },
+  { title: "Mobile App Dev", img: "iconita.png" },
+  { title: "Database", img: "iconita.png" },
+  { title: "UI/UX Design", img: "iconita.png" },
+];
+
+const creativeSkills = [
+  { title: "Photography", img: "photography.png" },
+  { title: "Painting", img: "painting.png" },
+  { title: "Graphic Design", img: "iconita.png" },
+  { title: "Fashion Design", img: "fashion.png" },
+  { title: "Cooking & Baking", img: "cooking.png" },
+  { title: "Music Production", img: "music.png" },
+];
+
+const SkillCard = ({
+  title,
+  imageSrc,
+  isSelected,
+  onToggle,
+}: {
+  title: string;
+  imageSrc: string;
+  isSelected: boolean;
+  onToggle: () => void;
+}) => {
+  return (
+    <div
+      className="flex flex-col items-center gap-2 cursor-pointer"
+      onClick={onToggle}
+      style={{ cursor: "pointer" }}
+    >
+      <div
+        className="w-24 h-24 rounded-sm relative overflow-hidden flex items-center justify-center shrink-0"
+        style={{
+          backgroundColor: isSelected
+            ? "rgba(64, 201, 231, 0.2)"
+            : "rgba(148, 198, 231, 0.5)",
+          border: isSelected ? "2px solid #40C9E7" : "none",
+        }}
+      >
+        {/* Background Shape */}
+        <div className="absolute top-[20px] opacity-100">
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 48 48"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M24 47.998C37.255 47.998 48 37.253 48 23.998C48 10.746 37.255 0 24 0C10.745 0 0 10.745 0 23.999C0 37.253 10.745 47.998 24 47.998Z"
+              fill="#E04F5F"
+            />
+          </svg>
+        </div>
+
+        {/* Image */}
+        <div className="relative z-10 mt-0">
+          <img
+            src={imageSrc}
+            alt={title}
+            className="w-10 h-10 object-contain"
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+              const parent = e.currentTarget.parentElement;
+              if (parent) {
+                parent.innerHTML =
+                  '<div class="w-8 h-8 bg-gray-400 rounded"></div>';
+              }
+            }}
+          />
+        </div>
+      </div>
+      <div className="text-center text-blue-950 text-xs font-normal font-sans w-24 leading-tight">
+        {title}
+      </div>
+    </div>
+  );
+};
+
+const SkillSelectionStep = ({
+  formData,
+  updateFormData,
+}: SkillSelectionStepProps) => {
+  const toggleSkill = (category: "tech" | "creative", skillTitle: string) => {
+    const currentSkills = formData.selectedSkills || { tech: [], creative: [] };
+    const categorySkills = currentSkills[category];
+
+    if (categorySkills.includes(skillTitle)) {
+      updateFormData({
+        ...formData,
+        selectedSkills: {
+          ...currentSkills,
+          [category]: categorySkills.filter((s: string) => s !== skillTitle),
+        },
+      });
+    } else {
+      updateFormData({
+        ...formData,
+        selectedSkills: {
+          ...currentSkills,
+          [category]: [...categorySkills, skillTitle],
+        },
+      });
+    }
+  };
+
+  const isSkillSelected = (
+    category: "tech" | "creative",
+    skillTitle: string,
+  ) => {
+    const currentSkills = formData.selectedSkills || { tech: [], creative: [] };
+    return currentSkills[category]?.includes(skillTitle) || false;
+  };
+
+  return (
+    <div className="flex-1 overflow-y-auto px-6 mt-6 pb-10">
+      {/* TECH SECTION */}
+      <h3 className="text-blue-950 text-sm font-normal font-sans mb-4">
+        Tech & Digital Skills
+      </h3>
+      <div className="grid grid-cols-3 gap-x-4 gap-y-6 mb-8">
+        {techSkills.map((skill, index) => (
+          <SkillCard
+            key={index}
+            title={skill.title}
+            imageSrc={skill.img}
+            isSelected={isSkillSelected("tech", skill.title)}
+            onToggle={() => toggleSkill("tech", skill.title)}
+          />
+        ))}
+      </div>
+
+      {/* CREATIVE SECTION */}
+      <h3 className="text-blue-950 text-sm font-normal font-sans mb-4">
+        Creative & Practical Skills
+      </h3>
+      <div className="grid grid-cols-3 gap-x-4 gap-y-6">
+        {creativeSkills.map((skill, index) => (
+          <SkillCard
+            key={index}
+            title={skill.title}
+            imageSrc={skill.img}
+            isSelected={isSkillSelected("creative", skill.title)}
+            onToggle={() => toggleSkill("creative", skill.title)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ============================================================================
+// STEP 3: SPECIALIZATION
+// ============================================================================
+
+const categories = [
+  { icon: "💻", label: "Tech & Digital Skills" },
+  { icon: "🎨", label: "Creative & Design Skills" },
+  { icon: "💬", label: "Communication & Soft Skills" },
+  { icon: "📈", label: "Business & Marketing Skills" },
+  { icon: "🌱", label: "Personal Growth & Lifestyle" },
+  { icon: "🧰", label: "Practical & Everyday Skills" },
+  { icon: "🧠", label: "Science & Education" },
+  { icon: "🌍", label: "Social Impact & Global Studies" },
+  { icon: "⚡", label: "Sports, Fitness & Performance" },
+  { icon: "🎮", label: "Entertainment & Media" },
+];
+
+const SpecializationStep = ({
+  formData,
+  updateFormData,
+}: SpecializationStepProps) => {
+  return (
+    <div
+      style={{
+        flex: 1,
+        overflowY: "auto",
+        padding: "10px 17px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
+      }}
+    >
+      {categories.map((item, index) => (
+        <div
+          key={index}
+          onClick={() =>
+            updateFormData({ ...formData, specialization: item.label })
+          }
+          style={{
+            width: "100%",
+            height: 56,
+            background:
+              formData.specialization === item.label
+                ? "rgba(64, 201, 231, 0.2)"
+                : "rgba(82.65, 119.42, 156.19, 0.10)",
+            borderRadius: 10,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            flexShrink: 0,
+            border:
+              formData.specialization === item.label
+                ? "2px solid #40C9E7"
+                : "none",
+          }}
+        >
+          <div
+            style={{
+              textAlign: "center",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <span
+              style={{
+                color: "black",
+                fontSize: 20,
+                fontWeight: 600,
+                lineHeight: "14.81px",
+              }}
+            >
+              {item.icon}
+            </span>
+            <span
+              style={{
+                color: "black",
+                fontSize: 16,
+                fontWeight: 500,
+                lineHeight: "14.81px",
+              }}
+            >
+              {item.label}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ============================================================================
+// STEP 4: SKILL ATTRIBUTION
+// ============================================================================
+
+const SkillAttributionStep = ({
+  formData,
+  updateFormData,
+}: SkillAttributionStepProps) => {
+  const handleAddSkill = () => {
+    if (formData.skillName.trim()) {
+      updateFormData({
+        ...formData,
+        skills: [...formData.skills, formData.skillName],
+        skillName: "",
+        description: "",
+        link: "",
+      });
+    }
+  };
+
+  return (
+    <div
+      style={{
+        padding: "0 25px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "20px",
+      }}
+    >
+      {/* SKILLS SECTION */}
+      <div
+        style={{
+          backgroundColor: "#C6CDD9",
+          borderRadius: "15px",
+          padding: "15px",
+          display: "flex",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "10px",
+        }}
+      >
+        <span
+          style={{
+            color: "black",
+            fontWeight: 600,
+            fontSize: 14,
+            marginRight: 5,
+          }}
+        >
+          Skills:
+        </span>
+        {formData.skills.map((skill: string, index: number) => (
+          <div
+            key={index}
+            style={{
+              backgroundColor: "#2B4B75",
+              color: "white",
+              padding: "6px 14px",
+              borderRadius: "20px",
+              fontSize: 13,
+              fontWeight: 500,
+            }}
+          >
+            {skill}
+          </div>
+        ))}
+      </div>
+
+      {/* FORM SECTION */}
+      <div
+        style={{
+          border: "1px solid #DCE5F2",
+          borderRadius: "15px",
+          padding: "20px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "15px",
+        }}
+      >
+        {/* Input: Skill Name */}
+        <input
+          type="text"
+          placeholder="Your Skill Name"
+          value={formData.skillName || ""}
+          onChange={(e) =>
+            updateFormData({ ...formData, skillName: e.target.value })
+          }
+          style={{
+            width: "100%",
+            padding: "15px",
+            borderRadius: "8px",
+            border: "none",
+            backgroundColor: "#D6DCE5",
+            color: "#1D324E",
+            fontSize: 14,
+            outline: "none",
+            boxSizing: "border-box",
+          }}
+        />
+
+        {/* Textarea: Description */}
+        <textarea
+          placeholder="Describe your Skill"
+          value={formData.description || ""}
+          onChange={(e) =>
+            updateFormData({ ...formData, description: e.target.value })
+          }
+          style={{
+            width: "100%",
+            height: "140px",
+            padding: "15px",
+            borderRadius: "8px",
+            border: "none",
+            backgroundColor: "#D6DCE5",
+            color: "#1D324E",
+            fontSize: 14,
+            outline: "none",
+            resize: "none",
+            fontFamily: "'Inter', sans-serif",
+            boxSizing: "border-box",
+          }}
+        />
+
+        {/* Link Input & Attachment Button Row */}
+        <div style={{ display: "flex", gap: "10px" }}>
+          <div
+            style={{
+              flex: 1,
+              backgroundColor: "#D6DCE5",
+              borderRadius: "8px",
+              display: "flex",
+              alignItems: "center",
+              paddingRight: "15px",
+            }}
+          >
+            <input
+              type="text"
+              placeholder="Link your Skill"
+              value={formData.link || ""}
+              onChange={(e) =>
+                updateFormData({ ...formData, link: e.target.value })
+              }
+              style={{
+                flex: 1,
+                padding: "15px",
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                color: "#1D324E",
+                fontSize: 14,
+              }}
+            />
+            <SendPlaneIcon />
+          </div>
+
+          {/* Attachment Button */}
+          <div
+            style={{
+              width: 50,
+              backgroundColor: "#D6DCE5",
+              borderRadius: "8px",
+              display: "grid",
+              placeItems: "center",
+              cursor: "pointer",
+            }}
+          >
+            <PaperClipIcon />
+          </div>
+        </div>
+
+        {/* Add Skill Button */}
+        <button
+          onClick={handleAddSkill}
+          style={{
+            width: "100%",
+            backgroundColor: "#93C6E7",
+            color: "#24507F",
+            border: "none",
+            borderRadius: "8px",
+            padding: "15px 0",
+            fontSize: 18,
+            fontWeight: 500,
+            cursor: "pointer",
+            marginTop: "10px",
+          }}
+        >
+          Add Your Skill
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ============================================================================
+// PROGRESS INDICATOR
+// ============================================================================
+
+const ProgressIndicator = ({
+  currentStep,
+  totalSteps = 4,
+}: {
+  currentStep: number;
+  totalSteps: number;
+}) => {
+  const stepTitles = ["Skills", "Specialization", "Skill Details", "Profile"];
+
+  return (
+    <div style={{ marginBottom: 20, padding: "0 25px" }}>
+      {/* Step Titles */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: 10,
+          fontSize: 12,
+          color: "#1D324E",
+          fontWeight: 500,
+        }}
+      >
+        {stepTitles.map((title, index) => (
+          <span
+            key={index}
+            style={{
+              color: index === currentStep ? "#40C9E7" : "#496995",
+              fontWeight: index === currentStep ? 600 : 400,
+            }}
+          >
+            {title}
+          </span>
+        ))}
+      </div>
+
+      {/* Visual Progress Bar */}
+      <div
+        style={{
+          width: "100%",
+          height: 24,
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ width: 300, position: "relative" }}>
+          {/* Background Line */}
+          <div
+            style={{
+              position: "absolute",
+              top: 11,
+              left: 3,
+              right: 3,
+              height: 1,
+              background: "#2965B5",
+            }}
+          />
+
+          {/* Steps */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              position: "relative",
+            }}
+          >
+            {Array.from({ length: totalSteps }).map((_, index) => (
+              <div key={index} style={{ marginTop: 0 }}>
+                {index === currentStep ? (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="8" fill="#40C9E7" />
+                    <circle cx="12" cy="12" r="6" fill="#94C6E7" />
+                  </svg>
+                ) : index < currentStep ? (
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <circle cx="6" cy="6" r="6" fill="#40C9E7" />
+                  </svg>
+                ) : (
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <circle cx="5" cy="5" r="5" fill="#2965B5" />
+                  </svg>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================================================
+// MAIN COMPONENT: ONBOARDING FLOW
+// ============================================================================
+
+export default function OnboardingFlowPage() {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [formData, setFormData] = useState<FormData>({
+    bio: "",
+    selectedSkills: { tech: [], creative: [] },
+    skills: ["Wireframing", "Figma", "User Flows", "UX Research"],
+    specialization: "",
+    skillName: "",
+    description: "",
+    link: "",
+  });
+
+  const stepTitles = [
+    "Shape Your Growth Path",
+    "Choose Your Specialization",
+    "Bring Your Skills to Life",
+    "Show Your Best Self",
+  ];
+
+  const stepDescriptions = [
+    "Choose the skills you'd like to explore and start learning what matters most to you. We'll tailor your experience just for you!",
+    "Select your primary area of focus. This helps us match you with relevant opportunities and resources.",
+    "Upload what you know and start growing from here. Let us know what you're great at!",
+    "Add a friendly, professional-looking photo to personalize your profile. Let us know you better!",
+  ];
+
+  const handleNext = () => {
+    if (currentStep < 3) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      // Submit the form
+      console.log("Form submitted:", formData);
+      alert(
+        "Onboarding complete! Form data: " + JSON.stringify(formData, null, 2),
+      );
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          <SkillSelectionStep
+            formData={formData}
+            updateFormData={setFormData}
+          />
+        );
+      case 1:
+        return (
+          <SpecializationStep
+            formData={formData}
+            updateFormData={setFormData}
+          />
+        );
+      case 2:
+        return (
+          <SkillAttributionStep
+            formData={formData}
+            updateFormData={setFormData}
+          />
+        );
+      case 3:
+        return <ProfileStep formData={formData} updateFormData={setFormData} />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div
+      style={{
+        width: "100%",
+        maxWidth: 390,
+        minHeight: 844,
+        background: "white",
+        fontFamily: "'Inter', sans-serif",
+        overflowX: "hidden",
+        margin: "0 auto",
+        position: "relative",
+        paddingBottom: 40,
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      {/* HEADER */}
+      <div
+        style={{
+          padding: "20px 25px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          zIndex: 10,
+          position: "relative",
+        }}
+      >
+        <div style={{ cursor: "pointer" }} onClick={handleBack}>
+          <BackArrowIcon />
+        </div>
+
+        <div style={{ transform: "scale(0.9)" }}>
+          <BrandLogo />
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-end",
+            gap: 5,
+          }}
+        >
+          <div style={{ width: 20, height: 2, background: "#333" }}></div>
+          <div style={{ width: 30, height: 2, background: "#333" }}></div>
+          <div style={{ width: 25, height: 2, background: "#333" }}></div>
+        </div>
+      </div>
+
+      {/* PROGRESS INDICATOR */}
+      <ProgressIndicator currentStep={currentStep} totalSteps={4} />
+
+      {/* TOP CARD: Step Intro */}
+      <div
+        style={{
+          margin: "10px 25px 30px 25px",
+          background: "rgba(139, 154, 183, 0.20)",
+          borderRadius: 10,
+          padding: "20px 17px",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: 20 }}>
+          <h2
+            style={{
+              color: "#1D324E",
+              fontSize: 20,
+              fontWeight: 700,
+              margin: "0 0 8px 0",
+            }}
+          >
+            {stepTitles[currentStep]}
+          </h2>
+          <p
+            style={{
+              color: "#2F2E41",
+              fontSize: 14,
+              fontWeight: 400,
+              lineHeight: "1.4",
+              margin: "0 0 12px 0",
+            }}
+          >
+            {stepDescriptions[currentStep]}
+          </p>
+        </div>
+
+        <div
+          style={{
+            width: "100%",
+            height: 56,
+            background: "rgba(148, 198, 231, 0.58)",
+            borderRadius: 10,
+            display: "grid",
+            placeItems: "center",
+            cursor: "pointer",
+          }}
+          onClick={handleNext}
+        >
+          <span style={{ color: "#1D324E", fontSize: 20, fontWeight: 600 }}>
+            {currentStep === 3 ? "Complete Onboarding" : "Continue"}
+          </span>
+        </div>
+      </div>
+
+      {/* STEP CONTENT */}
+      <div style={{ flex: 1, overflowY: "auto" }}>{renderStep()}</div>
+
+      {/* NAVIGATION BUTTONS (for smaller screens) */}
+      <div
+        style={{
+          padding: "20px 25px",
+          display: "flex",
+          gap: "10px",
+          borderTop: "1px solid rgba(0,0,0,0.1)",
+          marginTop: "20px",
+        }}
+      >
+        <button
+          onClick={handleBack}
+          disabled={currentStep === 0}
+          style={{
+            flex: 1,
+            height: 50,
+            background:
+              currentStep === 0 ? "#f0f0f0" : "rgba(139, 154, 183, 0.20)",
+            borderRadius: 10,
+            border: "none",
+            color: currentStep === 0 ? "#999" : "#1D324E",
+            fontSize: 16,
+            fontWeight: 600,
+            cursor: currentStep === 0 ? "not-allowed" : "pointer",
+          }}
+        >
+          Back
+        </button>
+        <button
+          onClick={handleNext}
+          style={{
+            flex: 1,
+            height: 50,
+            background: "rgba(64, 201, 231, 0.7)",
+            borderRadius: 10,
+            border: "none",
+            color: "#1D324E",
+            fontSize: 16,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          {currentStep === 3 ? "Finish" : "Next"}
+        </button>
+      </div>
+    </div>
+  );
+}
