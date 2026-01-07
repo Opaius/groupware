@@ -83,7 +83,7 @@ const InteractiveSkillBadge = ({ skill, type, handleRemoveSkill }: InteractiveSk
           <AlertDialogFooter>
             <AlertDialogCancel>Anulează</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={(e) => {
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                 e.preventDefault();
                 handleRemoveSkill(skill, type);
               }}

@@ -43,4 +43,15 @@ export default defineSchema({
   })
     .index("by_key", ["key"])
     .index("by_conv", ["conversationId"]),
+
+  reviews: defineTable({
+    userId: v.string(),
+    userName: v.string(),
+    userImage: v.optional(v.string()),
+    rating: v.number(),
+    comment: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_created_at", ["createdAt"])
+    .index("by_user", ["userId"]),
 });

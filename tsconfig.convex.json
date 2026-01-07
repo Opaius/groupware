@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "ESNext",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": false,
+    "baseUrl": ".",
+    "paths": {
+      "convex/*": ["./convex/*"],
+      "@/convex/_generated/*": ["./convex/_generated/*"]
+    }
+  },
+  "include": ["convex/**/*.ts"],
+  "exclude": ["node_modules"]
+}
