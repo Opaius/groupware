@@ -74,6 +74,7 @@ export default defineSchema({
     userId: v.string(),
     name: v.string(),
     type: v.union(v.literal("current"), v.literal("wanted")),
+    category: v.optional(v.string()),
     description: v.optional(v.string()),
     link: v.optional(v.string()),
     createdAt: v.number(),

@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import {
   OnboardingFormData,
   ProfileStep,
@@ -20,14 +21,11 @@ import { api } from "~/convex/_generated/api";
 
 const BrandLogo = () => (
   <div style={{ width: 122, height: 66, position: "relative" }}>
-    <img
+    <Image
       src="/logo.png"
       alt="Skill Trade Logo"
-      style={{
-        width: "100%",
-        height: "100%",
-        objectFit: "contain",
-      }}
+      fill
+      style={{ objectFit: "contain" }}
     />
   </div>
 );
@@ -41,6 +39,7 @@ export default function OnboardingFlowPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [formData, setFormData] = useState<OnboardingFormData>({
     bio: "",
@@ -54,6 +53,72 @@ export default function OnboardingFlowPage() {
   const completeOnboardingMutation = useMutation(
     api.onboarding.completeOnboarding,
   );
+
+  // Load existing profile data if any
+  const onboardingStatus = useQuery(api.onboarding.getOnboardingStatus, {});
+
+  // Load existing profile data when onboarding status is available
+  React.useEffect(() => {
+    // Skip if still loading
+    if (onboardingStatus === undefined) {
+      return;
+    }
+
+    // Query has completed (could be null or have data)
+    if (onboardingStatus?.profile) {
+      const profile = onboardingStatus.profile;
+
+      // Helper to parse storage ID from either plain string or JSON string
+      // Handles cases where storageId might be a JSON string like {"storageId":"..."}
+      // Also handles double-encoded JSON strings (quoted JSON strings)
+      // Recursively parses until a non-JSON string or string without storageId field
+      const parseStorageId = (
+        storageId: string | null | undefined,
+      ): string | undefined => {
+        if (!storageId) return undefined;
+
+        let actualStorageId = storageId.trim();
+        let changed = true;
+        let iterations = 0;
+
+        // Keep parsing as long as we're making progress, but limit iterations to prevent infinite loops
+        while (changed && iterations < 10) {
+          changed = false;
+          iterations++;
+
+          // Try to strip outer quotes if present
+          if (
+            actualStorageId.length >= 2 &&
+            actualStorageId[0] === '"' &&
+            actualStorageId[actualStorageId.length - 1] === '"'
+          ) {
+            actualStorageId = actualStorageId.slice(1, -1);
+            changed = true;
+          }
+
+          try {
+            const parsed = JSON.parse(actualStorageId);
+            if (parsed && typeof parsed.storageId === "string") {
+              actualStorageId = parsed.storageId;
+              changed = true;
+            }
+          } catch {
+            // Not JSON, use as-is
+          }
+        }
+
+        return actualStorageId;
+      };
+
+      setFormData((prev) => ({
+        ...prev,
+        bio: profile.bio || "",
+        mainPhotoUrl: parseStorageId(profile.mainPhoto),
+        featuredImageUrl: parseStorageId(profile.featuredImage),
+      }));
+    }
+    setIsLoading(false);
+  }, [onboardingStatus]);
 
   const stepTitles = [
     "Choose Your Categories",
@@ -93,7 +158,8 @@ export default function OnboardingFlowPage() {
 
       const customSkills = (formData.customSkills || []).map((skill) => ({
         name: skill.name,
-        type: formData.skillType,
+        type: "current" as "current" | "wanted",
+        category: skill.category,
         description: skill.description || "",
         link: "",
       }));
@@ -183,6 +249,39 @@ export default function OnboardingFlowPage() {
     }
     return "Continue";
   };
+
+  // Show loading state while checking for existing data
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 390,
+          minHeight: 844,
+          background: "white",
+          fontFamily: "'Inter', sans-serif",
+          overflowX: "hidden",
+          margin: "0 auto",
+          position: "relative",
+          paddingBottom: 40,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          style={{
+            textAlign: "center",
+            color: "#1D324E",
+            fontSize: 16,
+          }}
+        >
+          Loading your data...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

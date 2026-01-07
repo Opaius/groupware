@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "~/convex/_generated/api";
 import {
   Settings,
   Edit2,
@@ -8,16 +10,11 @@ import {
   MapPin,
   Star,
   Zap,
-  User,
   Plus,
   X,
   Save,
-  Filter,
-  MessageSquare,
-  Bell,
-  Compass,
 } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +33,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-// Datele inițiale ale utilizatorului
+// Datele inițiale ale utilizatorului (fallback)
 const initialUserData = {
   name: "User Test",
   role: "Web designer",
@@ -51,21 +48,6 @@ const initialUserData = {
 };
 
 // --- Componente Reutilizabile (Definite în afara componentei principale pentru curățenie) ---
-
-interface NavItemProps {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  isActive: boolean;
-}
-
-const NavItem = ({ icon: Icon, label, isActive }: NavItemProps) => (
-  <div
-    className={`flex flex-col items-center p-1 cursor-pointer transition-colors ${isActive ? "text-primary" : "text-gray-500"}`}
-  >
-    <Icon className="h-6 w-6" />
-    <span className="text-xs mt-0.5">{label}</span>
-  </div>
-);
 
 interface InteractiveSkillBadgeProps {
   skill: string;
@@ -150,21 +132,98 @@ const ProfileActionButton = ({
 // --- Componenta Principală Interactivă ---
 
 export default function ProfileScreenInteractive() {
+  // Fetch real user data from Convex
+  const userProfileData = useQuery(api.onboarding.getUserProfileWithSkills, {});
+
+  // Get profile image URL if available
+  const mainPhotoUrlQuery = useQuery(
+    api.onboarding.getImageUrl,
+    userProfileData?.profile?.mainPhoto
+      ? { storageId: userProfileData.profile.mainPhoto }
+      : "skip",
+  );
+
+  // Loading state removed as unused
+
+  // Extract data from query result
+  const userProfile = userProfileData?.profile;
+  const catalogSkills = useMemo(
+    () => userProfileData?.catalogSkills || [],
+    [userProfileData],
+  );
+  const customSkills = useMemo(
+    () => userProfileData?.customSkills || [],
+    [userProfileData],
+  );
+  const authUser = userProfileData?.authUser;
+
+  // Combine catalog and custom skills into current and wanted skills with useMemo
+  const currentSkills = useMemo(
+    () => [
+      ...catalogSkills
+        .filter((skill) => skill.type === "current")
+        .map((skill) => skill.name),
+      ...customSkills
+        .filter((skill) => skill.type === "current")
+        .map((skill) => skill.name),
+    ],
+    [catalogSkills, customSkills],
+  );
+
+  const wantedSkills = useMemo(
+    () => [
+      ...catalogSkills
+        .filter((skill) => skill.type === "wanted")
+        .map((skill) => skill.name),
+      ...customSkills
+        .filter((skill) => skill.type === "wanted")
+        .map((skill) => skill.name),
+    ],
+    [catalogSkills, customSkills],
+  );
+
+  // Get user bio from profile or use default
+  const userBio = userProfile?.bio || initialUserData.description;
+  const userName = authUser?.name || initialUserData.name;
+  const userRole = initialUserData.role; // TODO: Add role field to user schema
+  const userLocation = initialUserData.location; // TODO: Add location field to user schema
+  const userRating = initialUserData.rating; // TODO: Add rating field to user schema
+
   // Starea pentru datele editabile
-  const [description, setDescription] = useState(initialUserData.description);
+  const [description, setDescription] = useState(userBio);
   const [isEditingDescription, setIsEditingDescription] = useState(false);
-  const [skills, setSkills] = useState(initialUserData.skills);
-  const [learning, setLearning] = useState(initialUserData.lookingToLearn);
+  const [skills, setSkills] = useState(currentSkills);
+  const [learning, setLearning] = useState(wantedSkills);
   const [newSkill, setNewSkill] = useState("");
   const [isAddingSkill, setIsAddingSkill] = useState(false);
   const [isAddingLearning, setIsAddingLearning] = useState(false);
 
+  // Update local state when query data changes
+  useEffect(() => {
+    if (userProfileData !== undefined) {
+      setDescription(userBio);
+      setSkills(currentSkills);
+      setLearning(wantedSkills);
+    }
+  }, [userProfileData, userBio, currentSkills, wantedSkills]);
+
   // --- Logica de Interactivitate ---
 
-  const handleDescriptionSave = () => {
-    // Aici se poate adăuga logica de API call (ex: axios.put('/api/profile', { description }))
-    console.log("Descriere salvată:", description);
-    setIsEditingDescription(false);
+  const saveOnboardingStep = useMutation(api.onboarding.saveOnboardingStep);
+
+  const handleDescriptionSave = async () => {
+    try {
+      // Save description to Convex
+      await saveOnboardingStep({
+        step: "profile",
+        data: { bio: description },
+      });
+      console.log("Descriere salvată:", description);
+      setIsEditingDescription(false);
+    } catch (error) {
+      console.error("Error saving description:", error);
+      alert("Failed to save description. Please try again.");
+    }
   };
 
   const handleAddSkill = (type: "skill" | "learning") => {
@@ -223,25 +282,32 @@ export default function ProfileScreenInteractive() {
           {/* Info de bază (Static) */}
           <div className="flex flex-col items-center">
             <Avatar className="h-40 w-40 border-4 border-background shadow-lg">
+              {mainPhotoUrlQuery?.url && (
+                <AvatarImage
+                  src={mainPhotoUrlQuery.url}
+                  alt={userName}
+                  className="object-cover"
+                />
+              )}
               <AvatarFallback className="bg-secondary text-white font-bold text-4xl">
-                UT
+                {userName
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <h1 className="text-2xl font-bold text-primary mt-4">
-              {initialUserData.name}
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              {initialUserData.role}
-            </p>
+            <h1 className="text-2xl font-bold text-primary mt-4">{userName}</h1>
+            <p className="text-sm text-muted-foreground mt-1">{userRole}</p>
             <div className="flex items-center space-x-4 mt-3">
               <div className="flex items-center space-x-1 text-base text-primary">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span>{initialUserData.location}</span>
+                <span>{userLocation}</span>
               </div>
               <Card className="flex items-center space-x-1 p-2 bg-card rounded-full shadow-md border-none">
                 <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
                 <span className="text-base font-medium text-primary">
-                  {initialUserData.rating}
+                  {userRating}
                 </span>
               </Card>
             </div>
@@ -410,7 +476,7 @@ export default function ProfileScreenInteractive() {
               <div className="relative h-4 rounded-xl bg-gray-300">
                 <Progress
                   value={initialUserData.progress}
-                  className="h-full bg-[#40C9E7] rounded-xl [&>*]:bg-[#40C9E7]"
+                  className="h-full bg-[#40C9E7] rounded-xl *:bg-[#40C9E7]"
                 />
                 <div
                   className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white rounded-full border border-[#40C9E7] shadow-md"

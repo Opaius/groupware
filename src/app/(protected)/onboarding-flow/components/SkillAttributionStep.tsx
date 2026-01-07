@@ -391,7 +391,7 @@ const SkillAttributionStep = ({
                 Your Mastered Skills ({formData.customSkills.length})
               </h4>
               <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-                {formData.skillType === "current" ? "Current" : "Wanted"}
+                Mastered
               </span>
             </div>
           </div>

@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
-import { SkillSelectionStepProps, Skill, SkillCardProps } from "./types";
+import { SkillSelectionStepProps, SkillCardProps } from "./types";
 import {
   Code,
   Palette,

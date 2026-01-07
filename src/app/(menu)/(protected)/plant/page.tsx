@@ -16,7 +16,12 @@ import {
 } from "lucide-react";
 
 const SeedIcon = ({ className = "w-20 h-20" }) => (
-  <img src="/Seed.svg" className={className} style={{ objectFit: "contain" }} />
+  <img
+    src="/Seed.svg"
+    alt="Seed"
+    className={className}
+    style={{ objectFit: "contain" }}
+  />
 );
 
 const GerminationIcon = ({ className = "w-20 h-20" }) => (
@@ -272,7 +277,8 @@ export default function RulesPage() {
               <div className="mb-6 p-4 bg-blue-50 rounded-lg">
                 <p className="text-gray-700 mb-2 font-medium">Meaning</p>
                 <p className="text-gray-600">
-                  You've planted your first seed - your growth journey begins.
+                  You&apos;ve planted your first seed - your growth journey
+                  begins.
                 </p>
               </div>
 

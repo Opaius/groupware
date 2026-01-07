@@ -2,6 +2,55 @@ import { mutation, query } from "./_generated/server";
 import { v, ConvexError } from "convex/values";
 import { Id } from "./_generated/dataModel";
 import { authComponent } from "./auth";
+import { components } from "./_generated/api";
+
+// ============================================================================
+// SHARED HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Parse storage ID from either plain string or JSON string
+ * Handles cases where storageId might be a JSON string like {"storageId":"..."}
+ * Also handles double-encoded JSON strings (quoted JSON strings)
+ * Recursively parses until a non-JSON string or string without storageId field
+ */
+function parseStorageId(
+  storageId: string | null | undefined,
+): string | null | undefined {
+  if (!storageId) return storageId;
+
+  let actualStorageId = storageId.trim();
+  let changed = true;
+  let iterations = 0;
+
+  // Keep parsing as long as we're making progress, but limit iterations to prevent infinite loops
+  while (changed && iterations < 10) {
+    changed = false;
+    iterations++;
+
+    // Try to strip outer quotes if present
+    if (
+      actualStorageId.length >= 2 &&
+      actualStorageId[0] === '"' &&
+      actualStorageId[actualStorageId.length - 1] === '"'
+    ) {
+      actualStorageId = actualStorageId.slice(1, -1);
+      changed = true;
+    }
+
+    try {
+      const parsed = JSON.parse(actualStorageId);
+      if (parsed && typeof parsed.storageId === "string") {
+        actualStorageId = parsed.storageId;
+        changed = true;
+      }
+    } catch {
+      // Not JSON, use as-is
+    }
+  }
+
+  return actualStorageId;
+}
 
 // ============================================================================
 // TYPES & VALIDATORS
@@ -37,10 +86,145 @@ export const getOnboardingStatus = query({
 
     const hasProfile = !!profile;
 
+    // Parse storage IDs if they exist in the profile
+    let parsedProfile = null;
+    if (profile) {
+      parsedProfile = {
+        ...profile,
+        mainPhoto: parseStorageId(profile.mainPhoto),
+        featuredImage: parseStorageId(profile.featuredImage),
+      };
+    }
+
     return {
       hasSeenOnboarding,
       hasProfile,
-      profile: profile || null,
+      profile: parsedProfile || null,
+    };
+  },
+});
+
+/**
+ * Get a download URL for a storage ID
+ */
+export const getImageUrl = query({
+  args: {
+    storageId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const auth = await authComponent.getAuthUser(ctx);
+    if (!auth) {
+      throw new ConvexError("Not authenticated");
+    }
+
+    if (!args.storageId || args.storageId.trim() === "") {
+      throw new ConvexError("Storage ID is required");
+    }
+
+    // Parse storageId - it might be a JSON string containing storageId field
+    const actualStorageId = parseStorageId(args.storageId);
+    if (!actualStorageId) {
+      throw new ConvexError("Invalid storage ID");
+    }
+
+    // Get URL for the storage ID
+    const url = await ctx.storage.getUrl(actualStorageId);
+
+    return {
+      success: true,
+      url,
+      storageId: actualStorageId,
+      exists: url !== null,
+    };
+  },
+});
+
+/**
+ * Get complete user profile data including skills for edit-profile page
+ */
+export const getUserProfileWithSkills = query({
+  args: {
+    userId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const auth = await authComponent.getAuthUser(ctx);
+    if (!auth) {
+      throw new ConvexError("Not authenticated");
+    }
+
+    const userId = args.userId || auth._id;
+
+    // Get user profile
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!profile) {
+      return {
+        profile: null,
+        catalogSkills: [],
+        customSkills: [],
+        authUser: auth,
+        hasSeenOnboarding: auth.hasSeenOnboarding || false,
+      };
+    }
+
+    // Parse storage IDs in profile
+    const parsedProfile = {
+      ...profile,
+      mainPhoto: parseStorageId(profile.mainPhoto),
+      featuredImage: parseStorageId(profile.featuredImage),
+    };
+
+    // Get catalog skills (userSkills with skill details)
+    const userSkills = await ctx.db
+      .query("userSkills")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    const catalogSkills = [];
+    for (const userSkill of userSkills) {
+      const skill = await ctx.db.get(userSkill.skillId);
+      if (skill) {
+        const category = skill.categoryId
+          ? await ctx.db.get(skill.categoryId)
+          : null;
+        catalogSkills.push({
+          id: userSkill._id,
+          skillId: skill._id,
+          name: skill.name,
+          icon: skill.icon || "",
+          type: userSkill.type,
+          description: userSkill.description || "",
+          category: category ? category.name : "Unknown",
+          createdAt: userSkill.createdAt,
+        });
+      }
+    }
+
+    // Get custom skills
+    const userCustomSkills = await ctx.db
+      .query("userCustomSkills")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    const customSkills = userCustomSkills.map((skill) => ({
+      id: skill._id,
+      name: skill.name,
+      type: skill.type,
+      category: skill.category || "Other",
+      description: skill.description || "",
+      link: skill.link || "",
+      createdAt: skill.createdAt,
+    }));
+
+    return {
+      profile: parsedProfile,
+      catalogSkills,
+      customSkills,
+      authUser: auth,
+      hasSeenOnboarding: auth.hasSeenOnboarding || false,
     };
   },
 });
@@ -48,6 +232,35 @@ export const getOnboardingStatus = query({
 // ============================================================================
 // MUTATIONS
 // ============================================================================
+
+/**
+ * Generate upload URLs for profile images
+ */
+export const generateUploadUrl = mutation({
+  args: {
+    count: v.optional(v.number()), // Number of URLs to generate (default: 1)
+  },
+  handler: async (ctx, args) => {
+    const auth = await authComponent.getAuthUser(ctx);
+    if (!auth) {
+      throw new ConvexError("Not authenticated");
+    }
+
+    const count = args.count || 1;
+    const urls = [];
+
+    for (let i = 0; i < count; i++) {
+      const url = await ctx.storage.generateUploadUrl();
+      urls.push(url);
+    }
+
+    return {
+      success: true,
+      urls,
+      count: urls.length,
+    };
+  },
+});
 
 /**
  * Complete the onboarding process for the current user
@@ -71,6 +284,7 @@ export const completeOnboarding = mutation({
       v.object({
         name: v.string(),
         type: v.union(v.literal("current"), v.literal("wanted")),
+        category: v.optional(v.string()),
         description: v.optional(v.string()),
         link: v.optional(v.string()),
       }),
@@ -128,8 +342,12 @@ export const completeOnboarding = mutation({
     if (existingProfile) {
       await ctx.db.patch(existingProfile._id, {
         bio: args.bio || existingProfile.bio,
-        mainPhoto: args.mainPhoto || existingProfile.mainPhoto,
-        featuredImage: args.featuredImage || existingProfile.featuredImage,
+        mainPhoto:
+          (parseStorageId(args.mainPhoto) ?? undefined) ||
+          existingProfile.mainPhoto,
+        featuredImage:
+          (parseStorageId(args.featuredImage) ?? undefined) ||
+          existingProfile.featuredImage,
         specializationCategoryId: specializationCategoryId,
         updatedAt: now,
       });
@@ -138,8 +356,8 @@ export const completeOnboarding = mutation({
       profileId = await ctx.db.insert("userProfiles", {
         userId,
         bio: args.bio || "",
-        mainPhoto: args.mainPhoto,
-        featuredImage: args.featuredImage,
+        mainPhoto: parseStorageId(args.mainPhoto) ?? undefined,
+        featuredImage: parseStorageId(args.featuredImage) ?? undefined,
         specializationCategoryId,
         createdAt: now,
         updatedAt: now,
@@ -242,6 +460,7 @@ export const completeOnboarding = mutation({
           userId,
           name: customSkill.name,
           type: customSkill.type,
+          category: customSkill.category,
           description: customSkill.description || "",
           link: customSkill.link || "",
           createdAt: now,
@@ -250,11 +469,13 @@ export const completeOnboarding = mutation({
           customSkillId,
           name: customSkill.name,
           type: customSkill.type,
+          category: customSkill.category,
         });
       } else {
         // Update existing custom skill
         await ctx.db.patch(existingCustomSkill._id, {
           type: customSkill.type,
+          category: customSkill.category,
           description:
             customSkill.description || existingCustomSkill.description,
           link: customSkill.link || existingCustomSkill.link,
@@ -263,6 +484,7 @@ export const completeOnboarding = mutation({
           customSkillId: existingCustomSkill._id,
           name: customSkill.name,
           type: customSkill.type,
+          category: customSkill.category,
         });
       }
     }
@@ -270,9 +492,14 @@ export const completeOnboarding = mutation({
     // ============================================================================
     // 5. UPDATE USER'S ONBOARDING STATUS IN AUTH
     // ============================================================================
-    // Note: This requires updating the auth user's additional fields
-    // The actual implementation depends on how better-auth handles updates
-    // For now, we'll assume there's a way to mark onboarding as complete
+    // Update the user's onboarding status in the auth table using Better-Auth adapter
+    await ctx.runMutation(components.betterAuth.adapter.updateOne, {
+      input: {
+        model: "user",
+        update: { hasSeenOnboarding: true },
+        where: [{ field: "_id", operator: "eq", value: auth._id }],
+      },
+    });
 
     return {
       success: true,
@@ -337,13 +564,13 @@ export const saveOnboardingStep = mutation({
         }
         if (args.data.mainPhoto !== undefined) {
           await ctx.db.patch(profile._id, {
-            mainPhoto: args.data.mainPhoto,
+            mainPhoto: parseStorageId(args.data.mainPhoto) ?? undefined,
             updatedAt: now,
           });
         }
         if (args.data.featuredImage !== undefined) {
           await ctx.db.patch(profile._id, {
-            featuredImage: args.data.featuredImage,
+            featuredImage: parseStorageId(args.data.featuredImage) ?? undefined,
             updatedAt: now,
           });
         }
