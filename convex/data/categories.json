@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Tech & Digital Skills",
+    "icon": "💻"
+  },
+  {
+    "name": "Creative & Design Skills",
+    "icon": "🎨"
+  },
+  {
+    "name": "Communication & Soft Skills",
+    "icon": "💬"
+  },
+  {
+    "name": "Business & Marketing Skills",
+    "icon": "📈"
+  },
+  {
+    "name": "Personal Growth & Lifestyle",
+    "icon": "🌱"
+  },
+  {
+    "name": "Practical & Everyday Skills",
+    "icon": "🧰"
+  },
+  {
+    "name": "Science & Education",
+    "icon": "🧠"
+  },
+  {
+    "name": "Social Impact & Global Studies",
+    "icon": "🌍"
+  },
+  {
+    "name": "Sports, Fitness & Performance",
+    "icon": "⚡"
+  },
+  {
+    "name": "Entertainment & Media",
+    "icon": "🎮"
+  }
+]

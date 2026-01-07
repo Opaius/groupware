@@ -2,14 +2,17 @@
 
 import React, { useState } from "react";
 import { ArrowLeft } from "lucide-react";
+import { useMutation } from "convex/react";
 import {
   OnboardingFormData,
   ProfileStep,
+  CategorySelectionStep,
   SkillSelectionStep,
-  SpecializationStep,
   SkillAttributionStep,
   ProgressIndicator,
 } from "./components";
+import { useRouter } from "next/navigation";
+import { api } from "~/convex/_generated/api";
 
 // ============================================================================
 // REUSABLE COMPONENTS
@@ -34,46 +37,94 @@ const BrandLogo = () => (
 // ============================================================================
 
 export default function OnboardingFlowPage() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const [formData, setFormData] = useState<OnboardingFormData>({
     bio: "",
-    selectedSkills: { tech: [], creative: [] },
-    skills: ["Wireframing", "Figma", "User Flows", "UX Research"],
-    specialization: "",
-    skillName: "",
-    description: "",
-    link: "",
+    specializationLabel: "",
+    skillType: "current",
+    selectedCategories: [],
+    selectedSkills: [],
+    customSkills: [],
   });
 
+  const completeOnboardingMutation = useMutation(
+    api.onboarding.completeOnboarding,
+  );
+
   const stepTitles = [
-    "Shape Your Growth Path",
-    "Choose Your Specialization",
-    "Bring Your Skills to Life",
-    "Show Your Best Self",
+    "Choose Your Categories",
+    "Select Your Skills",
+    "Add Mastered Skills",
+    "Complete Your Profile",
   ];
 
   const stepDescriptions = [
-    "Choose the skills you'd like to explore and start learning what matters most to you. We'll tailor your experience just for you!",
-    "Select your primary area of focus. This helps us match you with relevant opportunities and resources.",
-    "Upload what you know and start growing from here. Let us know what you're great at!",
-    "Add a friendly, professional-looking photo to personalize your profile. Let us know you better!",
+    "Select up to 3 skill categories that interest you most. You'll choose skills from these areas next.",
+    "Choose specific skills from your selected categories. Mark skills you already have or want to learn.",
+    "Search for skills you master or add new ones. Describe your proficiency level for each skill.",
+    "Add a bio and profile photos to personalize your account and connect with others.",
   ];
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
+      setError(null);
     } else {
       // Submit the form
-      console.log("Form submitted:", formData);
-      alert(
-        "Onboarding complete! Form data: " + JSON.stringify(formData, null, 2),
-      );
+      await submitOnboarding();
+    }
+  };
+
+  const submitOnboarding = async () => {
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // Transform form data to match mutation schema
+      const catalogSkills = (formData.selectedSkills || []).map((skill) => ({
+        title: skill.title,
+        type: skill.type,
+        categoryName: skill.categoryName,
+      }));
+
+      const customSkills = (formData.customSkills || []).map((skill) => ({
+        name: skill.name,
+        type: formData.skillType,
+        description: skill.description || "",
+        link: "",
+      }));
+
+      const result = await completeOnboardingMutation({
+        bio: formData.bio || "",
+        specializationLabel: formData.specializationLabel,
+        catalogSkills,
+        customSkills,
+        mainPhoto: formData.mainPhotoUrl,
+        featuredImage: formData.featuredImageUrl,
+      });
+
+      if (result.success) {
+        // Redirect to dashboard or home page
+        router.push("/");
+      } else {
+        setError("Failed to complete onboarding. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error completing onboarding:", err);
+      setError("An error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleBack = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      setError(null);
     }
   };
 
@@ -81,14 +132,14 @@ export default function OnboardingFlowPage() {
     switch (currentStep) {
       case 0:
         return (
-          <SkillSelectionStep
+          <CategorySelectionStep
             formData={formData}
             updateFormData={setFormData}
           />
         );
       case 1:
         return (
-          <SpecializationStep
+          <SkillSelectionStep
             formData={formData}
             updateFormData={setFormData}
           />
@@ -105,6 +156,32 @@ export default function OnboardingFlowPage() {
       default:
         return null;
     }
+  };
+
+  const isFormValid = () => {
+    switch (currentStep) {
+      case 0:
+        // Must have at least one category selected
+        return (formData.selectedCategories?.length || 0) > 0;
+      case 1:
+        // Must have at least one skill selected from chosen categories
+        return (formData.selectedSkills?.length || 0) > 0;
+      case 2:
+        // Custom skills are optional
+        return true;
+      case 3:
+        // Bio is optional, images are optional
+        return true;
+      default:
+        return false;
+    }
+  };
+
+  const nextButtonText = () => {
+    if (currentStep === 3) {
+      return isSubmitting ? "Completing..." : "Complete Onboarding";
+    }
+    return "Continue";
   };
 
   return (
@@ -159,6 +236,24 @@ export default function OnboardingFlowPage() {
       {/* PROGRESS INDICATOR */}
       <ProgressIndicator currentStep={currentStep} totalSteps={4} />
 
+      {/* ERROR MESSAGE */}
+      {error && (
+        <div
+          style={{
+            margin: "10px 25px 0",
+            padding: "10px 15px",
+            background: "rgba(255, 0, 0, 0.1)",
+            border: "1px solid rgba(255, 0, 0, 0.3)",
+            borderRadius: 8,
+            color: "#d32f2f",
+            fontSize: 14,
+            textAlign: "center",
+          }}
+        >
+          {error}
+        </div>
+      )}
+
       {/* TOP CARD: Step Intro */}
       <div
         style={{
@@ -198,16 +293,19 @@ export default function OnboardingFlowPage() {
           style={{
             width: "100%",
             height: 56,
-            background: "rgba(148, 198, 231, 0.58)",
+            background: isFormValid()
+              ? "rgba(148, 198, 231, 0.58)"
+              : "rgba(148, 198, 231, 0.3)",
             borderRadius: 10,
             display: "grid",
             placeItems: "center",
-            cursor: "pointer",
+            cursor: isFormValid() && !isSubmitting ? "pointer" : "not-allowed",
+            opacity: isFormValid() && !isSubmitting ? 1 : 0.7,
           }}
-          onClick={handleNext}
+          onClick={() => isFormValid() && !isSubmitting && handleNext()}
         >
           <span style={{ color: "#1D324E", fontSize: 20, fontWeight: 600 }}>
-            {currentStep === 3 ? "Complete Onboarding" : "Continue"}
+            {nextButtonText()}
           </span>
         </div>
       </div>
@@ -227,37 +325,49 @@ export default function OnboardingFlowPage() {
       >
         <button
           onClick={handleBack}
-          disabled={currentStep === 0}
+          disabled={currentStep === 0 || isSubmitting}
           style={{
             flex: 1,
             height: 50,
             background:
-              currentStep === 0 ? "#f0f0f0" : "rgba(139, 154, 183, 0.20)",
+              currentStep === 0 || isSubmitting
+                ? "#f0f0f0"
+                : "rgba(139, 154, 183, 0.20)",
             borderRadius: 10,
             border: "none",
-            color: currentStep === 0 ? "#999" : "#1D324E",
+            color: currentStep === 0 || isSubmitting ? "#999" : "#1D324E",
             fontSize: 16,
             fontWeight: 600,
-            cursor: currentStep === 0 ? "not-allowed" : "pointer",
+            cursor:
+              currentStep === 0 || isSubmitting ? "not-allowed" : "pointer",
           }}
         >
           Back
         </button>
         <button
           onClick={handleNext}
+          disabled={!isFormValid() || isSubmitting}
           style={{
             flex: 1,
             height: 50,
-            background: "rgba(64, 201, 231, 0.7)",
+            background:
+              isFormValid() && !isSubmitting
+                ? "rgba(64, 201, 231, 0.7)"
+                : "rgba(64, 201, 231, 0.3)",
             borderRadius: 10,
             border: "none",
             color: "#1D324E",
             fontSize: 16,
             fontWeight: 600,
-            cursor: "pointer",
+            cursor: isFormValid() && !isSubmitting ? "pointer" : "not-allowed",
+            opacity: isFormValid() && !isSubmitting ? 1 : 0.7,
           }}
         >
-          {currentStep === 3 ? "Finish" : "Next"}
+          {currentStep === 3
+            ? isSubmitting
+              ? "Processing..."
+              : "Finish"
+            : "Next"}
         </button>
       </div>
     </div>

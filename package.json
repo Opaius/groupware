@@ -8,7 +8,9 @@
     "start": "next start",
     "convex:setup": "bunx convex env set SITE_URL=http://localhost:3000 && bunx convex env set BETTER_AUTH_SECRET=verysecret",
     "lint": "eslint",
-    "gen-types": "bun run generate-types.js"
+    "gen-types": "bun run generate-types.js",
+    "seed:skills": "bun scripts/seed-skills.ts",
+    "reset:skills": "bun scripts/reset-skills.ts"
   },
   "dependencies": {
     "@convex-dev/better-auth": "^0.9.11",

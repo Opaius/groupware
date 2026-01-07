@@ -60,8 +60,43 @@ export default defineSchema({
   userSkills: defineTable({
     userId: v.string(),
     skillId: v.id("skill"),
-    description: v.string(),
+    type: v.union(v.literal("current"), v.literal("wanted")),
+    description: v.optional(v.string()),
+    link: v.optional(v.string()),
+    createdAt: v.number(),
+    // For future vector search
+    embedding: v.optional(v.array(v.float64())),
   })
     .index("by_user", ["userId"])
-    .index("by_skill", ["skillId"]),
+    .index("by_skill", ["skillId"])
+    .index("by_user_type", ["userId", "type"]),
+  userCustomSkills: defineTable({
+    userId: v.string(),
+    name: v.string(),
+    type: v.union(v.literal("current"), v.literal("wanted")),
+    description: v.optional(v.string()),
+    link: v.optional(v.string()),
+    createdAt: v.number(),
+    // For future vector search
+    embedding: v.optional(v.array(v.float64())),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_type", ["userId", "type"])
+    .searchIndex("search_custom_skill", {
+      searchField: "name",
+      staged: false,
+    }),
+  userProfiles: defineTable({
+    userId: v.string(),
+    bio: v.optional(v.string()),
+    mainPhoto: v.optional(v.string()),
+    featuredImage: v.optional(v.string()),
+    specializationCategoryId: v.optional(v.id("skillCategory")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    // For future vector search of bio
+    bioEmbedding: v.optional(v.array(v.float64())),
+  })
+    .index("by_user", ["userId"])
+    .index("by_specialization", ["specializationCategoryId"]),
 });

@@ -1,0 +1,152 @@
+[
+  {
+    "categoryName": "Tech & Digital Skills",
+    "skills": [
+      { "name": "Web Development", "icon": "💻" },
+      { "name": "Mobile App Development", "icon": "📱" },
+      { "name": "Cloud Computing", "icon": "☁️" },
+      { "name": "Data Science", "icon": "📊" },
+      { "name": "Machine Learning", "icon": "🤖" },
+      { "name": "Cybersecurity", "icon": "🔒" },
+      { "name": "UI/UX Design", "icon": "🎨" },
+      { "name": "DevOps", "icon": "🔄" },
+      { "name": "Blockchain", "icon": "⛓️" },
+      { "name": "Game Development", "icon": "🎮" }
+    ]
+  },
+  {
+    "categoryName": "Creative & Design Skills",
+    "skills": [
+      { "name": "Graphic Design", "icon": "🎨" },
+      { "name": "Photography", "icon": "📷" },
+      { "name": "Video Editing", "icon": "🎬" },
+      { "name": "3D Modeling", "icon": "🔺" },
+      { "name": "Animation", "icon": "🎞️" },
+      { "name": "Illustration", "icon": "✏️" },
+      { "name": "Fashion Design", "icon": "👗" },
+      { "name": "Interior Design", "icon": "🛋️" },
+      { "name": "Typography", "icon": "🔤" },
+      { "name": "Brand Identity", "icon": "🏷️" }
+    ]
+  },
+  {
+    "categoryName": "Communication & Soft Skills",
+    "skills": [
+      { "name": "Public Speaking", "icon": "🎤" },
+      { "name": "Leadership", "icon": "👑" },
+      { "name": "Team Management", "icon": "🤝" },
+      { "name": "Negotiation", "icon": "🤝" },
+      { "name": "Conflict Resolution", "icon": "⚖️" },
+      { "name": "Active Listening", "icon": "👂" },
+      { "name": "Emotional Intelligence", "icon": "💖" },
+      { "name": "Presentation Skills", "icon": "📊" },
+      { "name": "Networking", "icon": "🌐" },
+      { "name": "Time Management", "icon": "⏰" }
+    ]
+  },
+  {
+    "categoryName": "Business & Marketing Skills",
+    "skills": [
+      { "name": "Digital Marketing", "icon": "📱" },
+      { "name": "SEO Optimization", "icon": "🔍" },
+      { "name": "Social Media Marketing", "icon": "📱" },
+      { "name": "Content Strategy", "icon": "📝" },
+      { "name": "Market Research", "icon": "🔍" },
+      { "name": "Sales Strategy", "icon": "💰" },
+      { "name": "Business Development", "icon": "📈" },
+      { "name": "Financial Planning", "icon": "💵" },
+      { "name": "Project Management", "icon": "📋" },
+      { "name": "Entrepreneurship", "icon": "💡" }
+    ]
+  },
+  {
+    "categoryName": "Personal Growth & Lifestyle",
+    "skills": [
+      { "name": "Meditation", "icon": "🧘" },
+      { "name": "Mindfulness", "icon": "🌿" },
+      { "name": "Goal Setting", "icon": "🎯" },
+      { "name": "Habit Building", "icon": "🔄" },
+      { "name": "Stress Management", "icon": "😌" },
+      { "name": "Personal Finance", "icon": "💰" },
+      { "name": "Nutrition Planning", "icon": "🥗" },
+      { "name": "Sleep Optimization", "icon": "😴" },
+      { "name": "Journaling", "icon": "📔" },
+      { "name": "Self-Reflection", "icon": "🤔" }
+    ]
+  },
+  {
+    "categoryName": "Practical & Everyday Skills",
+    "skills": [
+      { "name": "Cooking", "icon": "👨‍🍳" },
+      { "name": "Baking", "icon": "🍰" },
+      { "name": "Home Repair", "icon": "🔨" },
+      { "name": "Gardening", "icon": "🌱" },
+      { "name": "Sewing", "icon": "🧵" },
+      { "name": "Car Maintenance", "icon": "🚗" },
+      { "name": "First Aid", "icon": "🩹" },
+      { "name": "Budgeting", "icon": "💰" },
+      { "name": "Cleaning", "icon": "🧹" },
+      { "name": "Organization", "icon": "🗂️" }
+    ]
+  },
+  {
+    "categoryName": "Science & Education",
+    "skills": [
+      { "name": "Scientific Research", "icon": "🔬" },
+      { "name": "Data Analysis", "icon": "📈" },
+      { "name": "Laboratory Techniques", "icon": "🧪" },
+      { "name": "Teaching", "icon": "👩‍🏫" },
+      { "name": "Curriculum Design", "icon": "📚" },
+      { "name": "Academic Writing", "icon": "✍️" },
+      { "name": "Public Speaking", "icon": "🎤" },
+      { "name": "Mentoring", "icon": "👥" },
+      { "name": "Critical Thinking", "icon": "🧠" },
+      { "name": "Research Methodology", "icon": "📋" }
+    ]
+  },
+  {
+    "categoryName": "Social Impact & Global Studies",
+    "skills": [
+      { "name": "Nonprofit Management", "icon": "🏛️" },
+      { "name": "Community Organizing", "icon": "👥" },
+      { "name": "Fundraising", "icon": "💰" },
+      { "name": "Grant Writing", "icon": "✍️" },
+      { "name": "Advocacy", "icon": "📢" },
+      { "name": "Policy Analysis", "icon": "📜" },
+      { "name": "Social Research", "icon": "🔍" },
+      { "name": "Cultural Competency", "icon": "🌍" },
+      { "name": "Volunteer Coordination", "icon": "🤝" },
+      { "name": "Sustainability Planning", "icon": "🌱" }
+    ]
+  },
+  {
+    "categoryName": "Sports, Fitness & Performance",
+    "skills": [
+      { "name": "Personal Training", "icon": "💪" },
+      { "name": "Yoga Instruction", "icon": "🧘" },
+      { "name": "Nutrition Coaching", "icon": "🥗" },
+      { "name": "Sports Coaching", "icon": "⚽" },
+      { "name": "Dance Instruction", "icon": "💃" },
+      { "name": "Martial Arts", "icon": "🥋" },
+      { "name": "Swimming Instruction", "icon": "🏊" },
+      { "name": "Strength Training", "icon": "🏋️" },
+      { "name": "Cardio Fitness", "icon": "🏃" },
+      { "name": "Rehabilitation", "icon": "🩺" }
+    ]
+  },
+  {
+    "categoryName": "Entertainment & Media",
+    "skills": [
+      { "name": "Acting", "icon": "🎭" },
+      { "name": "Singing", "icon": "🎤" },
+      { "name": "Music Production", "icon": "🎵" },
+      { "name": "Screenwriting", "icon": "📝" },
+      { "name": "Film Directing", "icon": "🎬" },
+      { "name": "Podcast Production", "icon": "🎙️" },
+      { "name": "Stand-up Comedy", "icon": "😂" },
+      { "name": "Voice Acting", "icon": "🗣️" },
+      { "name": "Event Hosting", "icon": "🎤" },
+      { "name": "Broadcasting", "icon": "📡" }
+    ]
+  }
+]
