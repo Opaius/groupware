@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import { SkillSelectionStepProps, SkillCardProps } from "./types";
@@ -18,7 +18,6 @@ import {
   Smartphone,
   Bug,
   Target,
-  CheckCircle,
   Search,
 } from "lucide-react";
 
@@ -213,11 +212,33 @@ const SkillSelectionStep = ({
 }: SkillSelectionStepProps) => {
   // Get selected categories from form data
   const selectedCategories = formData.selectedCategories || [];
-  const selectedSkills = formData.selectedSkills || [];
+  const selectedSkills = useMemo(
+    () => formData.selectedSkills || [],
+    [formData.selectedSkills],
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set(),
   );
+
+  // Ensure all selected skills are marked as "wanted" in this step
+  useEffect(() => {
+    const hasCurrentSkills = selectedSkills.some(
+      (skill) => skill.type === "current",
+    );
+    if (hasCurrentSkills) {
+      const updatedSkills = selectedSkills.map((skill) => ({
+        ...skill,
+        type: "wanted" as const,
+      }));
+
+      // Update form data if any skills were changed
+      updateFormData({
+        ...formData,
+        selectedSkills: updatedSkills,
+      });
+    }
+  }, [selectedSkills, formData, updateFormData]);
 
   console.log("DEBUG: selectedCategories", selectedCategories);
   console.log("DEBUG: selectedSkills", selectedSkills);
@@ -286,13 +307,13 @@ const SkillSelectionStep = ({
     const newSelectedSkills = [...selectedSkills];
 
     if (existingSkillIndex >= 0) {
-      // Remove skill if already selected with same type
+      // Remove skill if already selected
       newSelectedSkills.splice(existingSkillIndex, 1);
     } else {
-      // Add new skill with current skill type
+      // Add new skill as "wanted" skill (user wants to learn it)
       newSelectedSkills.push({
         title: skillTitle,
-        type: formData.skillType,
+        type: "wanted" as const,
         categoryName,
       });
     }
@@ -308,30 +329,6 @@ const SkillSelectionStep = ({
       (skill) =>
         skill.title === skillTitle && skill.categoryName === categoryName,
     );
-  };
-
-  const getSkillTypeLabel = (
-    skillTitle: string,
-    categoryName: string,
-  ): "current" | "wanted" | null => {
-    const skill = selectedSkills.find(
-      (s) => s.title === skillTitle && s.categoryName === categoryName,
-    );
-    return skill?.type || null;
-  };
-
-  const handleSkillTypeChange = (newType: "current" | "wanted") => {
-    // Update skill type and also update all selected skills to this type
-    const updatedSkills = selectedSkills.map((skill) => ({
-      ...skill,
-      type: newType,
-    }));
-
-    updateFormData({
-      ...formData,
-      skillType: newType,
-      selectedSkills: updatedSkills,
-    });
   };
 
   // Handle loading state
@@ -416,30 +413,18 @@ const SkillSelectionStep = ({
         </div>
       </div>
 
-      {/* Skill Type Selector */}
-      <div className="flex mb-6 gap-2">
-        <button
-          onClick={() => handleSkillTypeChange("current")}
-          className={`flex-1 py-3 rounded-lg flex items-center justify-center gap-2 ${
-            formData.skillType === "current"
-              ? "bg-[#40C9E7] text-white"
-              : "bg-gray-100 text-gray-700"
-          }`}
-        >
-          <CheckCircle size={20} />
-          <span>Current Skills</span>
-        </button>
-        <button
-          onClick={() => handleSkillTypeChange("wanted")}
-          className={`flex-1 py-3 rounded-lg flex items-center justify-center gap-2 ${
-            formData.skillType === "wanted"
-              ? "bg-[#40C9E7] text-white"
-              : "bg-gray-100 text-gray-700"
-          }`}
-        >
-          <Target size={20} />
-          <span>Wanted Skills</span>
-        </button>
+      {/* Skill Type Info - This step is only for selecting wanted skills */}
+      <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+        <div className="flex items-center gap-3">
+          <Target size={20} className="text-blue-600" />
+          <div>
+            <h4 className="text-blue-900 font-medium">Select Wanted Skills</h4>
+            <p className="text-blue-700 text-sm mt-1">
+              Choose skills you want to learn from your selected categories.
+              You&apos;ll add skills you already master in the next step.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Selection summary */}
@@ -462,16 +447,10 @@ const SkillSelectionStep = ({
             {selectedSkills.slice(0, 5).map((skill, index) => (
               <div
                 key={index}
-                className={`px-3 py-1.5 rounded-full text-sm ${
-                  skill.type === "current"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-blue-100 text-blue-800"
-                }`}
+                className="px-3 py-1.5 rounded-full text-sm bg-blue-100 text-blue-800"
               >
                 {skill.title}
-                <span className="ml-1 text-xs">
-                  ({skill.type === "current" ? "✓" : "→"})
-                </span>
+                <span className="ml-1 text-xs">(→)</span>
               </div>
             ))}
             {selectedSkills.length > 5 && (
@@ -516,15 +495,10 @@ const SkillSelectionStep = ({
                           : 6,
                       )
                       .map((skill, index) => {
-                        const skillTypeLabel = getSkillTypeLabel(
-                          skill.title,
-                          category.name,
-                        );
                         const isSelected = isSkillSelected(
                           skill.title,
                           category.name,
                         );
-                        const isCurrentType = skillTypeLabel === "current";
 
                         return (
                           <div key={index} className="relative">
@@ -536,15 +510,9 @@ const SkillSelectionStep = ({
                                 toggleSkill(skill.title, category.name)
                               }
                             />
-                            {skillTypeLabel && (
-                              <div
-                                className={`absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs ${
-                                  isCurrentType
-                                    ? "bg-green-500 text-white"
-                                    : "bg-blue-500 text-white"
-                                }`}
-                              >
-                                {isCurrentType ? "✓" : "→"}
+                            {isSelected && (
+                              <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs bg-blue-500 text-white">
+                                →
                               </div>
                             )}
                           </div>
@@ -590,20 +558,19 @@ const SkillSelectionStep = ({
           How to select wanted skills:
         </h4>
         <ul className="text-sm text-gray-600 space-y-1">
+          <li>• Click on any skill card to select it as a wanted skill</li>
           <li>
-            • Select <strong>Wanted Skills</strong> to choose skills you want to
-            learn
+            • Use the search bar to find specific skills you want to learn
           </li>
-          <li>• Use the search bar to find specific skills</li>
           <li>
             • Each category shows 6 skills initially - click &quot;Show
             more&quot; to see all
           </li>
-          <li>• Click on any skill card to select it as a wanted skill</li>
           <li>
             • Selected skills show → to indicate they&apos;re wanted skills
           </li>
           <li>• Click a selected skill again to remove it</li>
+          <li>• You&apos;ll add skills you already master in the next step</li>
         </ul>
       </div>
     </div>

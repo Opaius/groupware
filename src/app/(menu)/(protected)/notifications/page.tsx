@@ -50,7 +50,7 @@ const notifications = [
 
 export default function NotificationsPage() {
   return (
-    <div className="w-full min-h-screen bg-[#DCE9FB]/50 sm:max-w-[450px] md:max-w-[500px] lg:max-w-[550px] mx-auto pb-10">
+    <div className="w-full min-h-svh bg-[#DCE9FB]/50 sm:max-w-[450px] md:max-w-[500px] lg:max-w-[550px] mx-auto pb-10">
       {/* Header Identic cu ContactSupport */}
       <div className="pt-6 px-6 pb-4 bg-[#DCE9FB]">
         <div className="flex items-center gap-2">

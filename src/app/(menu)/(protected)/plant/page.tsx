@@ -500,7 +500,7 @@ export default function RulesPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto min-h-screen bg-white flex flex-col">
+    <div className="max-w-md mx-auto min-h-svh bg-white flex flex-col">
       <main className="flex-1 p-6 flex items-center justify-center min-h-[calc(100vh-4rem)] overflow-hidden">
         <div className="bg-blue-50 p-6 rounded-2xl w-full max-w-lg relative">
           <AnimatePresence mode="wait">

@@ -9,6 +9,7 @@ import CreateProfileSlide from "../CreateProfileSlide";
 import ConnectWithSkilledPeopleSlide from "./ConnectWithSkilledPeopleSlide";
 import SwipeToMatchSlide from "./SwipeToMatchSlide";
 import ChatPlanScheduleSlide from "./ChatPlanScheduleSlide";
+import SafeSecureSlide from "./SafeSecureSlide";
 import SkipButton from "./SkipButton";
 import NextButton from "./NextButton";
 
@@ -34,7 +35,7 @@ export default function GuideCarousel({
 
   const handleNext = () => {
     if (swiperInstance) {
-      if (activeIndex === 4) {
+      if (activeIndex === 5) {
         // Last slide - complete the guide
         onComplete?.();
       } else {
@@ -49,8 +50,8 @@ export default function GuideCarousel({
       return null; // No pagination on first slide
     }
 
-    // Show 4 indicators for slides 2-5 (slide 1 has no pagination)
-    const totalIndicators = 4;
+    // Show 5 indicators for slides 2-6 (slide 1 has no pagination)
+    const totalIndicators = 5;
 
     return (
       <div className="absolute bottom-[22px] left-1/2 -translate-x-1/2 z-30 flex items-center justify-center gap-4">
@@ -64,8 +65,8 @@ export default function GuideCarousel({
               onClick={() => {
                 if (swiperInstance) {
                   // Map indicator index to slide index
-                  // Index 0 -> slide 0, index 1 -> slide 1, index 2 -> slide 2, index 3 -> slide 3, index 4 -> slide 4
-                  swiperInstance.slideTo(index);
+                  // Index 0 -> slide 1, index 1 -> slide 2, index 2 -> slide 3, index 3 -> slide 4, index 4 -> slide 5
+                  swiperInstance.slideTo(index + 1);
                 }
               }}
               className={`transition-all duration-300 rounded-full ${
@@ -80,7 +81,7 @@ export default function GuideCarousel({
   };
 
   return (
-    <div className="h-full bg-white relative overflow-hidden">
+    <div className="min-h-svh bg-white relative overflow-hidden">
       <SkipButton onClick={handleSkip} isWhite={activeIndex > 0} />
 
       <Swiper
@@ -109,12 +110,12 @@ export default function GuideCarousel({
         <SwiperSlide>
           <ChatPlanScheduleSlide />
         </SwiperSlide>
+        <SwiperSlide>
+          <SafeSecureSlide />
+        </SwiperSlide>
       </Swiper>
 
       <CustomPagination />
-      {activeIndex === 0 && (
-        <NextButton onClick={handleNext} isLastSlide={false} />
-      )}
     </div>
   );
 }

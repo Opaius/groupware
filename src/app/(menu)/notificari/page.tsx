@@ -1,6 +1,11 @@
 "use client";
 
-import { Handshake, MessageSquare, Hourglass, CheckCircle2 } from "lucide-react";
+import {
+  Handshake,
+  MessageSquare,
+  Hourglass,
+  CheckCircle2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BackButton } from "@/components/back-button";
 
@@ -45,12 +50,14 @@ const notifications = [
 
 export default function NotificationsPage() {
   return (
-    <div className="w-full min-h-screen bg-[#DCE9FB]/50 sm:max-w-[450px] md:max-w-[500px] lg:max-w-[550px] mx-auto pb-10">
+    <div className="w-full min-h-svh bg-[#DCE9FB]/50 sm:max-w-[450px] md:max-w-[500px] lg:max-w-[550px] mx-auto pb-10">
       {/* Header Identic cu ContactSupport */}
       <div className="pt-6 px-6 pb-4 bg-[#DCE9FB]">
         <div className="flex items-center gap-2">
           <BackButton />
-          <span className="text-primary font-medium text-lg">Notifications</span>
+          <span className="text-primary font-medium text-lg">
+            Notifications
+          </span>
         </div>
       </div>
 
@@ -62,9 +69,7 @@ export default function NotificationsPage() {
             className="bg-white rounded-[15px] p-6 flex flex-col items-center justify-center shadow-sm border border-black/5"
           >
             {/* Iconița */}
-            <div className="mb-4">
-              {notif.icon}
-            </div>
+            <div className="mb-4">{notif.icon}</div>
 
             {/* Textul Notificării */}
             <p className="text-[#1d324e] font-semibold text-[1.1rem] mb-4 text-center">

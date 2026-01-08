@@ -44,7 +44,7 @@ export default function OnboardingFlowPage() {
   const [formData, setFormData] = useState<OnboardingFormData>({
     bio: "",
     specializationLabel: "",
-    skillType: "current",
+    skillType: "wanted",
     selectedCategories: [],
     selectedSkills: [],
     customSkills: [],
@@ -57,14 +57,18 @@ export default function OnboardingFlowPage() {
   // Load existing profile data if any
   const onboardingStatus = useQuery(api.onboarding.getOnboardingStatus, {});
 
-  // Load existing profile data when onboarding status is available
+  // Check if onboarding is already completed and redirect
   React.useEffect(() => {
-    // Skip if still loading
     if (onboardingStatus === undefined) {
       return;
     }
 
-    // Query has completed (could be null or have data)
+    if (onboardingStatus?.hasSeenOnboarding) {
+      router.push("/discover");
+      return;
+    }
+
+    // Load existing profile data when onboarding status is available
     if (onboardingStatus?.profile) {
       const profile = onboardingStatus.profile;
 
@@ -118,7 +122,7 @@ export default function OnboardingFlowPage() {
       }));
     }
     setIsLoading(false);
-  }, [onboardingStatus]);
+  }, [onboardingStatus, router]);
 
   const stepTitles = [
     "Choose Your Categories",
@@ -129,7 +133,7 @@ export default function OnboardingFlowPage() {
 
   const stepDescriptions = [
     "Select up to 3 skill categories that interest you most. You'll choose skills from these areas next.",
-    "Choose specific skills from your selected categories. Mark skills you already have or want to learn.",
+    "Choose specific skills from your selected categories that you want to learn.",
     "Search for skills you master or add new ones. Describe your proficiency level for each skill.",
     "Add a bio and profile photos to personalize your account and connect with others.",
   ];

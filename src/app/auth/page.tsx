@@ -28,7 +28,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="flex h-screen items-center justify-center overflow-hidden">
+    <div className="flex h-svh items-center justify-center overflow-hidden">
       <div className="w-full h-full bg-white grid grid-rows-[1fr_auto] items-center transition-all duration-300">
         {/* Titlu */}
         <div className="pt-8 px-6 text-center">
@@ -87,10 +87,10 @@ export default function AuthPage() {
         const { error } = await authClient.signIn.email({
           email: value.email,
           password: value.password,
-          callbackURL: "/chats",
+          callbackURL: "/",
         });
         if (error) setError(error.message ?? "Something went wrong");
-        else router.push("/chats");
+        else router.push("/");
       },
     });
     return (
@@ -216,11 +216,11 @@ export default function AuthPage() {
           name: value.name,
           email: value.email,
           password: value.password,
-          callbackURL: "/chats",
+          callbackURL: "/",
         });
         if (error) {
           setError(error.message ?? "something went wrong");
-        } else router.push("/chats");
+        } else router.push("/");
       },
     });
 

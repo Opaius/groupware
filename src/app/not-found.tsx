@@ -3,7 +3,7 @@ import { Home, Search } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-svh flex flex-col items-center justify-center p-6 bg-gradient-to-b from-blue-50 to-white">
       <div className="text-center max-w-md w-full space-y-8">
         {/* 404 Number with Animation */}
         <div className="relative">

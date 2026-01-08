@@ -50,7 +50,7 @@ export default function ReviewPage() {
   const [sortBy, setSortBy] = useState("Most Recent");
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-svh bg-white">
       {/* Header cu buton de back (folosind culorile tale din global) */}
       <header className="flex items-center px-4 py-6">
         <Button

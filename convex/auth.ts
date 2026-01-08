@@ -2,7 +2,8 @@ import { createClient, type GenericCtx } from "@convex-dev/better-auth";
 import { convex } from "@convex-dev/better-auth/plugins";
 import { components } from "./_generated/api";
 import { DataModel } from "./_generated/dataModel";
-import { query } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
+import { ConvexError } from "convex/values";
 import { betterAuth } from "better-auth";
 import authSchema from "./betterAuth/schema";
 
@@ -77,5 +78,26 @@ export const getAllUserSessions = query({
     );
     if (!sessions) return [];
     return sessions;
+  },
+});
+
+export const markAccountCreationComplete = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const auth = await authComponent.getAuthUser(ctx);
+    if (!auth) {
+      throw new ConvexError("Not authenticated");
+    }
+
+    // Update the user's hasFinishedCreateAccount flag
+    await ctx.runMutation(components.betterAuth.adapter.updateOne, {
+      input: {
+        model: "user",
+        update: { hasFinishedCreateAccount: true },
+        where: [{ field: "_id", operator: "eq", value: auth._id }],
+      },
+    });
+
+    return { success: true };
   },
 });

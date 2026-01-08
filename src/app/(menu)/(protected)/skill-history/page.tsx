@@ -176,7 +176,7 @@ const SkillHistoryPage = () => {
   });
 
   return (
-    <div className="min-h-screen bg-[#F0F6FF]">
+    <div className="min-h-svh bg-[#F0F6FF]">
       {/* header */}
       <header className="bg-white shadow-sm p-4 sticky top-0 z-10">
         <div className="flex items-center">
