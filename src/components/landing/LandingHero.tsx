@@ -22,20 +22,22 @@ export default function LandingHero() {
             </h1>
 
             <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto lg:mx-0">
-              Connect with people who have the skills you need and share your expertise in return.
-              A community where everyone has something to teach and something to learn.
+              Connect with people who have the skills you need and share your
+              expertise in return. A community where everyone has something to
+              teach and something to learn.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button size="lg" className="text-lg px-8 py-6" asChild>
-                <Link href="/auth">
-                  Get Started Free
-                </Link>
+                <Link href="/auth">Get Started Free</Link>
               </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6" asChild>
-                <Link href="#how-it-works">
-                  How It Works
-                </Link>
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-lg px-8 py-6"
+                asChild
+              >
+                <Link href="#how-it-works">How It Works</Link>
               </Button>
             </div>
 
@@ -68,11 +70,24 @@ export default function LandingHero() {
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64">
                   <div className="relative w-full h-full">
                     {/* Simple SVG illustration */}
-                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="100" cy="100" r="90" fill="#93c5fd" opacity="0.3" />
+                    <svg
+                      viewBox="0 0 200 200"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <circle
+                        cx="100"
+                        cy="100"
+                        r="90"
+                        fill="#93c5fd"
+                        opacity="0.3"
+                      />
                       <circle cx="70" cy="70" r="25" fill="#3b82f6" />
                       <circle cx="130" cy="130" r="25" fill="#06b6d4" />
-                      <path d="M70,70 L130,130" stroke="#1e40af" strokeWidth="4" />
+                      <path
+                        d="M70,70 L130,130"
+                        stroke="#1e40af"
+                        strokeWidth="4"
+                      />
                       <circle cx="100" cy="100" r="10" fill="#1e40af" />
                     </svg>
                   </div>
@@ -127,6 +142,3 @@ export default function LandingHero() {
     </div>
   );
 }
-```
-
-Now I need to provide the content in the response. I'll output it as requested.<｜end▁of▁thinking｜>
