@@ -2,13 +2,10 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  LucideCalendar,
-  LucidePaperclip,
-  LucideSend,
-  Loader2,
-} from "lucide-react";
+import { LucideSend, Loader2 } from "lucide-react";
 import { ChatMessage } from "@/components/chat/messages";
+import { CalendarButton } from "@/components/chat/CalendarButton";
+import { FileUploadButton } from "@/components/chat/FileUploadButton";
 import { Textarea } from "@/components/ui/textarea";
 import { getInitials, getRandomColorBasedOnName } from "@/lib/utils";
 import { api } from "../../../../convex/_generated/api";
@@ -23,7 +20,7 @@ import {
   useState,
 } from "react";
 import { useMutation, useQuery, usePaginatedQuery } from "convex/react";
-import { useRouter } from "next/navigation";
+
 import { BackButton } from "@/components/back-button";
 
 // --- Types ---
@@ -41,6 +38,21 @@ type EnrichedMessage = Doc<"messages"> & {
   metadata: MessageMetadata;
   sender?: { name?: string; image?: string | null };
   isOptimistic?: boolean; // We add this on the client side for pending messages
+  attachments?: Array<{
+    filename: string;
+    mimeType: string;
+    size: number;
+    url?: string;
+  }>;
+  appointment?: {
+    _id: Id<"appointments">;
+    title: string;
+    description?: string;
+    scheduledFor: number;
+    durationMinutes: number;
+    status: "pending" | "accepted" | "declined" | "cancelled" | "completed";
+    createdBy: string;
+  };
 };
 
 export default function ChatPage({
@@ -143,6 +155,8 @@ export default function ChatPage({
         allOtherUsersSeen: false,
         currentUserHasSeen: true,
       },
+      attachments: [],
+      appointment: undefined,
     };
 
     // 2. Update UI Immediately
@@ -241,7 +255,7 @@ export default function ChatPage({
 
       {/* --- Messages Body --- */}
       <div
-        className="flex-1 overflow-y-auto p-4 flex flex-col"
+        className="flex-1 overflow-y-auto p-4 flex flex-col bg-linear-to-b from-blue-50/30 to-white"
         ref={scrollContainerRef}
       >
         {/* Loading Spinner for initial fetch */}
@@ -298,6 +312,8 @@ export default function ChatPage({
                 avatarUrl={senderProfile?.image ?? undefined}
                 senderName={senderProfile?.name ?? undefined}
                 isOwnMessage={msg.senderId === currentUserId}
+                attachments={msg.attachments}
+                appointment={msg.appointment}
               />
             );
           })}
@@ -306,31 +322,31 @@ export default function ChatPage({
       </div>
 
       {/* --- Input Area --- */}
-      <div className="shrink-0 px-4 py-3 bg-background border-t">
+      <div className="shrink-0 px-4 py-4 bg-background/95 border-t backdrop-blur-sm shadow-lg">
         <Textarea
           onChange={(e) => setMessageBody(e.target.value)}
           onKeyDown={handleTextareaKeyDown}
           value={messageBody}
-          className="min-h-[50px] max-h-[200px] w-full resize-none rounded-xl"
+          className="min-h-12.5 max-h-50 w-full resize-none rounded-xl"
           placeholder="Type your message..."
-          containerClassName="border-input shadow-sm focus-within:ring-1 focus-within:ring-primary"
+          containerClassName="border-input/50 shadow-inner focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 rounded-2xl transition-all"
           icons={[
             <Button
               key="send"
               onClick={() => void handleSend()}
               disabled={!messageBody.trim()}
-              variant="ghost"
+              variant={messageBody.trim() ? "default" : "ghost"}
               size="icon"
-              className="text-primary hover:text-primary/80"
+              className={
+                messageBody.trim()
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-sm hover:shadow"
+                  : "text-primary hover:bg-primary/10 hover:text-primary transition-colors disabled:text-muted-foreground disabled:hover:bg-transparent"
+              }
             >
               <LucideSend className="size-5" />
             </Button>,
-            <Button key="attach" variant="ghost" size="icon">
-              <LucidePaperclip className="size-5" />
-            </Button>,
-            <Button key="calendar" variant="ghost" size="icon">
-              <LucideCalendar className="size-5" />
-            </Button>,
+            <FileUploadButton key="attach" conversationId={conversationId} />,
+            <CalendarButton key="calendar" conversationId={conversationId} />,
           ]}
         />
       </div>

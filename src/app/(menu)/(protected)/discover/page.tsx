@@ -4,14 +4,14 @@ import { useState, useRef, useCallback } from "react";
 import { useMutation, usePaginatedQuery, useAction } from "convex/react";
 import { api } from "~/convex/_generated/api";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import {
   Handshake,
-  FileUser,
+  User,
   X,
   ChevronDown,
   ChevronUp,
   Loader2,
-  User,
   Star,
   BookOpen,
   Brain,
@@ -65,6 +65,7 @@ type AIEnrichedUser = DiscoverUser & {
 export default function DiscoverPage() {
   const { data: session } = authClient.useSession();
   const currentUser = session?.user;
+  const router = useRouter();
 
   // State for expanded sections per user
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
@@ -248,9 +249,22 @@ export default function DiscoverPage() {
       // Note: We don't auto-advance anymore since cards are in a list
     } catch (error: unknown) {
       console.error("Swipe error:", error);
-      const message =
+      const errorMessage =
         error instanceof Error ? error.message : "Failed to process swipe";
-      toast.error(message);
+
+      // Check if it's "already swiped" error
+      if (errorMessage.includes("Already swiped on this user")) {
+        // User already swiped (like or message), that's okay
+        if (action === "reject") {
+          toast.info(`You already passed on ${targetUser.name}`);
+        } else if (action === "like") {
+          toast.info(`You already liked ${targetUser.name}`);
+        } else if (action === "message") {
+          toast.info(`You already messaged ${targetUser.name}`);
+        }
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setIsSwiping(false);
     }
@@ -496,13 +510,13 @@ export default function DiscoverPage() {
             </Button>
 
             <Button
-              onClick={() => handleSwipeAction("message", user)}
+              onClick={() => router.push(`/profile/${user.id}`)}
               disabled={isSwiping}
               className="rounded-full size-16 hover:text-blue-700 hover:bg-blue-50 border-2 border-blue-400 bg-white shadow-sm hover:shadow-md transition-all duration-200"
-              aria-label="Message"
+              aria-label="View Profile"
               variant="outline"
             >
-              <FileUser className="size-8" />
+              <User className="size-8" />
             </Button>
 
             <Button

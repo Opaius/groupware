@@ -1,5 +1,9 @@
 import { Doc } from "../../../convex/_generated/dataModel";
-import { getInitials, getRandomColorBasedOnName } from "@/lib/utils";
+import {
+  getInitials,
+  getRandomColorBasedOnName,
+  formatRelativeTime,
+} from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useRouter } from "next/navigation";
@@ -46,11 +50,8 @@ export function ConversationCard({
       </div>
       <div className="flex items-center ml-auto justify-center gap-4">
         {conversation.lastMessageAt && (
-          <div>
-            {new Date(conversation.lastMessageAt).toLocaleTimeString([], {
-              hour: "numeric",
-              minute: "numeric",
-            })}
+          <div className="text-xs text-muted-foreground">
+            {formatRelativeTime(conversation.lastMessageAt)}
           </div>
         )}
         {notSeenMessagesCount && (

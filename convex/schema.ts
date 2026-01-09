@@ -24,6 +24,8 @@ export default defineSchema({
     senderId: v.string(),
     body: v.string(),
     sentAt: v.number(),
+    attachmentIds: v.optional(v.array(v.id("messageAttachments"))),
+    appointmentId: v.optional(v.id("appointments")),
   }).index("by_conversation", ["conversationId"]), // Used for pagination
 
   messageMeta: defineTable({
@@ -138,4 +140,39 @@ export default defineSchema({
   })
     .index("by_user", ["user1Id"])
     .index("by_user_pair", ["user1Id", "user2Id"]),
+
+  messageAttachments: defineTable({
+    messageId: v.id("messages"),
+    storageId: v.id("_storage"),
+    filename: v.string(),
+    mimeType: v.string(),
+    size: v.number(),
+    uploadedAt: v.number(),
+  })
+    .index("by_message", ["messageId"])
+    .index("by_storage", ["storageId"]),
+
+  appointments: defineTable({
+    conversationId: v.id("conversations"),
+    createdBy: v.string(),
+    scheduledFor: v.number(),
+    durationMinutes: v.number(),
+    title: v.string(),
+    description: v.optional(v.string()),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("accepted"),
+      v.literal("declined"),
+      v.literal("cancelled"),
+      v.literal("completed"),
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    updatedBy: v.optional(v.string()),
+    declinedReason: v.optional(v.string()),
+  })
+    .index("by_conversation", ["conversationId"])
+    .index("by_created_by", ["createdBy"])
+    .index("by_status", ["status"])
+    .index("by_scheduled_for", ["scheduledFor"]),
 });

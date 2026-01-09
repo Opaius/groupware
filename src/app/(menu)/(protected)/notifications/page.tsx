@@ -82,6 +82,12 @@ export default function NotificationsPage() {
   // Fetch notifications
   const notificationsData = useQuery(api.discover.getUserNotifications);
   const markNotificationRead = useMutation(api.discover.markNotificationRead);
+  // Conversation mutation for direct messaging
+  const getOrCreateDirectConversation = useMutation(
+    api.chat.conversations.getOrCreateDirectConversation,
+  );
+  // Swipe mutation for recording interactions
+  const createSwipe = useMutation(api.discover.createSwipe);
 
   // Get matches for additional context
   const matchesData = useQuery(api.discover.getMatches);
@@ -117,17 +123,53 @@ export default function NotificationsPage() {
         } else if (notification.matchInfo?.conversationId) {
           router.push(`/chat/${notification.matchInfo.conversationId}`);
         } else if (notification.fromUser) {
-          // If no conversation exists but there's a match/message, create one
-          // This would need additional logic to create conversation
-          toast.info("Starting conversation...");
+          // Create conversation and navigate to chat
+          try {
+            const conversationId = await getOrCreateDirectConversation({
+              userB: notification.fromUser.id,
+            });
+
+            // Record a message swipe action
+            try {
+              await createSwipe({
+                targetUserId: notification.fromUser.id,
+                action: "message",
+              });
+            } catch (swipeError) {
+              // Check if it's "already swiped" error
+              const errorMessage =
+                swipeError instanceof Error
+                  ? swipeError.message
+                  : "Something went wrong";
+
+              if (
+                errorMessage.includes("Already swiped on this user") ||
+                errorMessage.includes("Already swiped")
+              ) {
+                // User already swiped (like or message), that's okay
+                toast.info(
+                  `Continuing conversation with ${notification.fromUser.name}`,
+                );
+              } else {
+                // Some other error - log it but continue
+                console.error("Swipe recording failed:", swipeError);
+              }
+            }
+
+            router.push(`/chat/${conversationId}`);
+          } catch (error) {
+            console.error("Failed to create conversation:", error);
+            toast.error("Failed to start conversation");
+            // Fallback to profile view
+            router.push(`/profile/${notification.fromUser.id}`);
+          }
         }
         break;
 
       case "like":
         // Navigate to user's profile or discover page
         if (notification.fromUser) {
-          // Could navigate to user profile
-          toast.info(`Viewing ${notification.fromUser.name}'s profile`);
+          router.push(`/profile/${notification.fromUser.id}`);
         }
         break;
 
@@ -259,7 +301,8 @@ export default function NotificationsPage() {
               No notifications yet
             </h3>
             <p className="text-gray-500 mb-6">
-              When you receive likes, matches, or messages, they'll appear here.
+              When you receive likes, matches, or messages, they&#39;ll appear
+              here.
             </p>
             <Button
               onClick={() => router.push("/discover")}
@@ -329,7 +372,7 @@ export default function NotificationsPage() {
                                     ? "border-red-300 text-red-600 hover:bg-red-50"
                                     : notification.type === "like"
                                       ? "border-pink-300 text-pink-600 hover:bg-pink-50"
-                                      : "border-[#6085b9] text-[#037ee6] hover:bg-[#f0f7ff]"
+                                      : "border-primary text-[#037ee6] hover:bg-[#f0f7ff]"
                                 } rounded-lg transition-colors`}
                               >
                                 {isMarkingRead === notification.id ? (
@@ -380,20 +423,89 @@ export default function NotificationsPage() {
                   <p className="text-gray-500 text-sm mt-1 truncate">
                     {match?.bio || "No bio"}
                   </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      if (match?.conversationId) {
-                        router.push(`/chat/${match.conversationId}`);
-                      } else {
-                        toast.info("No conversation started yet");
-                      }
-                    }}
-                    className="w-full mt-3 border-[#6085b9] text-[#037ee6] hover:bg-[#f0f7ff]"
-                  >
-                    Message
-                  </Button>
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        if (match?.conversationId) {
+                          router.push(`/chat/${match.conversationId}`);
+                        } else if (match?.userId) {
+                          try {
+                            // Create conversation first
+                            const conversationId =
+                              await getOrCreateDirectConversation({
+                                userB: match.userId,
+                              });
+
+                            try {
+                              // Try to record message swipe
+                              await createSwipe({
+                                targetUserId: match.userId,
+                                action: "message",
+                              });
+                              toast.success(`Message sent to ${match?.name}!`);
+                            } catch (swipeError) {
+                              // Check if it's "already swiped" error
+                              const errorMessage =
+                                swipeError instanceof Error
+                                  ? swipeError.message
+                                  : "Something went wrong";
+
+                              if (
+                                errorMessage.includes(
+                                  "Already swiped on this user",
+                                ) ||
+                                errorMessage.includes("Already swiped")
+                              ) {
+                                // User already swiped (like or message), that's okay
+                                toast.info(
+                                  `Continuing conversation with ${match?.name}`,
+                                );
+                              } else {
+                                // Some other error - show it
+                                console.error(
+                                  "Swipe recording failed:",
+                                  swipeError,
+                                );
+                                toast.error(errorMessage);
+                              }
+                            }
+
+                            // Navigate to the chat
+                            router.push(`/chat/${conversationId}`);
+                          } catch (error) {
+                            console.error(
+                              "Failed to create conversation:",
+                              error,
+                            );
+                            toast.error("Failed to start conversation");
+                            // Fallback to profile view
+                            if (match?.userId) {
+                              router.push(`/profile/${match.userId}`);
+                            }
+                          }
+                        } else {
+                          toast.info("No conversation started yet");
+                        }
+                      }}
+                      className="flex-1 border-primary text-[#037ee6] hover:bg-[#f0f7ff]"
+                    >
+                      Message
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (match?.userId) {
+                          router.push(`/profile/${match.userId}`);
+                        }
+                      }}
+                      className="flex-1 text-gray-700 hover:bg-gray-100"
+                    >
+                      Profile
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>

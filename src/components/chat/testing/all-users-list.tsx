@@ -1,56 +1,100 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { getInitials, getRandomColorBasedOnName } from "@/lib/utils";
+import {
+  getInitials,
+  getRandomColorBasedOnName,
+  formatRelativeTime,
+} from "@/lib/utils";
 import { useMutation } from "convex/react";
 import { LucideMessageCircle } from "lucide-react";
 import { api } from "../../../../convex/_generated/api";
 import { useRouter } from "next/navigation";
 
 type Props = {
-  user: {
-    id: string;
-    name: string;
-    avatarUrl: string;
-    email: string;
+  chat: {
+    conversationId: string;
+    otherUser: {
+      id: string;
+      name: string;
+      email: string;
+      avatarUrl: string;
+    };
+    conversation: {
+      lastMessageAt: number | null;
+      updatedAt: number;
+      createdAt: number;
+    };
+    lastMessage: {
+      text: string;
+      time: number;
+      senderId: string;
+    } | null;
   };
 };
 
-export function AllUsersList({ user }: Props) {
-  const avatarColor = getRandomColorBasedOnName(user.name);
+export function AllUsersList({ chat }: Props) {
+  const avatarColor = getRandomColorBasedOnName(chat.otherUser.name);
 
   const router = useRouter();
 
   const mutation = useMutation(
-    api.chat.conversations.getOrCreateDirectConversation
+    api.chat.conversations.getOrCreateDirectConversation,
   );
+
+  const hasMessages = chat.conversation.lastMessageAt !== null;
+
   return (
-    <div className="w-full gap-2 bg-muted items-center py-5 flex rounded-md px-4 border-muted">
+    <div
+      className="w-full gap-2 bg-muted items-center py-5 flex rounded-md px-4 border-muted hover:bg-muted/80 cursor-pointer"
+      onClick={async () => {
+        const result = await mutation({
+          userB: chat.otherUser.id,
+        });
+        if (result) router.push(`/chat/${result}`);
+      }}
+    >
       <Avatar>
         <AvatarFallback
           style={{
             backgroundColor: avatarColor,
           }}
         >
-          {getInitials(user.name)}
+          {getInitials(chat.otherUser.name)}
         </AvatarFallback>
-        <AvatarImage src={user.avatarUrl || ""} />
+        <AvatarImage src={chat.otherUser.avatarUrl || ""} />
       </Avatar>
-      <div className="flex flex-col">
-        <div>{user.name}</div>
-        <div>{user.email}</div>
+      <div className="flex flex-col flex-1 min-w-0">
+        <div className="font-semibold truncate">{chat.otherUser.name}</div>
+        {hasMessages && chat.lastMessage ? (
+          <div className="text-sm text-muted-foreground truncate">
+            {chat.lastMessage.text}
+          </div>
+        ) : (
+          <div className="text-sm text-muted-foreground italic">
+            No messages yet
+          </div>
+        )}
       </div>
-      <Button
-        size="icon-lg"
-        className="ml-auto"
-        onClick={async () => {
-          const result = await mutation({
-            userB: user.id,
-          });
-          if (result) router.push(`/chat/${result}`);
-        }}
-      >
-        <LucideMessageCircle />
-      </Button>
+      <div className="flex flex-col items-end gap-1">
+        {hasMessages && chat.conversation.lastMessageAt && (
+          <div className="text-xs text-muted-foreground">
+            {formatRelativeTime(chat.conversation.lastMessageAt)}
+          </div>
+        )}
+        <Button
+          size="icon-lg"
+          variant="ghost"
+          onClick={async (e) => {
+            e.stopPropagation();
+            const result = await mutation({
+              userB: chat.otherUser.id,
+            });
+            if (result) router.push(`/chat/${result}`);
+          }}
+        >
+          <LucideMessageCircle className="size-5" />
+        </Button>
+      </div>
     </div>
   );
 }

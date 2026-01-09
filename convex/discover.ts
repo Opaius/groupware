@@ -560,13 +560,50 @@ export const createSwipe = mutation({
           .first();
 
         if (!existingMatch) {
-          // If mutual swipe didn't start a convo, start one now?
-          // (Simplified: assuming like swipes don't start convos immediately unless configured)
+          // If mutual swipe didn't start a convo, start one now
+          let matchConversationId = mutualSwipe.conversationId;
+
+          // Check if conversation already exists
+          if (!matchConversationId) {
+            const key = makeDirectKey(user1Id, user2Id);
+            const existingDirectChat = await ctx.db
+              .query("directChats")
+              .withIndex("by_key", (q) => q.eq("key", key))
+              .first();
+
+            if (existingDirectChat) {
+              matchConversationId = existingDirectChat.conversationId;
+            } else {
+              // Create new conversation for the match
+              const convId = await ctx.db.insert("conversations", {
+                isGroup: false,
+                createdAt: now,
+                updatedAt: now,
+              });
+              await Promise.all([
+                ctx.db.insert("conversationParticipants", {
+                  conversationId: convId,
+                  userId: user1Id,
+                }),
+                ctx.db.insert("conversationParticipants", {
+                  conversationId: convId,
+                  userId: user2Id,
+                }),
+                ctx.db.insert("directChats", { key, conversationId: convId }),
+              ]);
+              matchConversationId = convId;
+            }
+
+            // Update mutual swipe with conversationId for future reference
+            await ctx.db.patch(mutualSwipe._id, {
+              conversationId: matchConversationId,
+            });
+          }
 
           await ctx.db.insert("matches", {
             user1Id,
             user2Id,
-            conversationId: mutualSwipe.conversationId,
+            conversationId: matchConversationId,
             createdAt: now,
           });
 
@@ -576,7 +613,7 @@ export const createSwipe = mutation({
               fromUserId: args.targetUserId,
               type: "match",
               userSwipeId: swipeId,
-              conversationId: mutualSwipe.conversationId,
+              conversationId: matchConversationId,
               read: false,
               createdAt: now,
             }),
@@ -585,7 +622,7 @@ export const createSwipe = mutation({
               fromUserId: currentUserIdStr,
               type: "match",
               userSwipeId: mutualSwipe._id,
-              conversationId: mutualSwipe.conversationId,
+              conversationId: matchConversationId,
               read: false,
               createdAt: now,
             }),
@@ -719,5 +756,64 @@ export const getMatches = query({
       }),
     );
     return enriched.filter(Boolean);
+  },
+});
+
+export const getUserProfile = query({
+  args: { userId: v.string() },
+  handler: async (ctx: QueryCtx, args: { userId: string }) => {
+    const auth = await authComponent.getAuthUser(ctx);
+    if (!auth) throw new ConvexError("Not authenticated");
+
+    const currentUserIdStr = auth._id.toString();
+    const targetUserId = args.userId;
+
+    // Get user data
+    const user = await authComponent.getAnyUserById(ctx, targetUserId);
+    if (!user) throw new ConvexError("User not found");
+
+    // Check if current user has swiped on target user
+    const existingSwipe = await ctx.db
+      .query("userSwipes")
+      .withIndex("by_user_target", (q) =>
+        q.eq("userId", currentUserIdStr).eq("targetUserId", targetUserId),
+      )
+      .first();
+
+    // Check if target user has swiped on current user
+    const mutualSwipe = await ctx.db
+      .query("userSwipes")
+      .withIndex("by_user_target", (q) =>
+        q.eq("userId", targetUserId).eq("targetUserId", currentUserIdStr),
+      )
+      .first();
+
+    // Check for match
+    const [user1Id, user2Id] = [currentUserIdStr, targetUserId].sort();
+    const existingMatch = await ctx.db
+      .query("matches")
+      .withIndex("by_user_pair", (q) =>
+        q.eq("user1Id", user1Id).eq("user2Id", user2Id),
+      )
+      .first();
+
+    // Get conversation ID from match or from mutual swipe with conversation
+    let conversationId = existingMatch?.conversationId || null;
+    if (!conversationId && mutualSwipe?.conversationId) {
+      conversationId = mutualSwipe.conversationId;
+    }
+
+    const enrichedUser = await enrichUserData(ctx, user);
+
+    return {
+      ...enrichedUser,
+      hasSwiped: !!existingSwipe,
+      swipeAction: existingSwipe?.action || null,
+      mutualSwipe: !!mutualSwipe,
+      mutualSwipeAction: mutualSwipe?.action || null,
+      isMatch: !!existingMatch,
+      conversationId,
+      matchCreatedAt: existingMatch?.createdAt || null,
+    };
   },
 });
