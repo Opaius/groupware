@@ -21,23 +21,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { authClient } from "@/lib/auth/auth-client";
 import { getInitials, getRandomColorBasedOnName } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { BackButton } from "@/components/back-button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+
 import Link from "next/link";
+import { useQuery } from "convex/react";
+import { api } from "~/convex/_generated/api";
 
 const SettingsPage = () => {
   const [settings, setSettings] = useState({
@@ -57,16 +49,48 @@ const SettingsPage = () => {
   const { data } = authClient.useSession();
   const router = useRouter();
   const user = data?.user;
+  const userProfileData = useQuery(api.onboarding.getUserProfileWithSkills, {});
+  const profile = userProfileData?.profile;
+
+  const featuredImageUrlQuery = useQuery(
+    api.onboarding.getImageUrl,
+    profile?.featuredImage ? { storageId: profile.featuredImage } : "skip",
+  );
+
+  const mainPhotoUrlQuery = useQuery(
+    api.onboarding.getImageUrl,
+    profile?.mainPhoto ? { storageId: profile.mainPhoto } : "skip",
+  );
+
+  const featuredImageUrl = useMemo(() => {
+    if (featuredImageUrlQuery?.url) return featuredImageUrlQuery.url;
+    return undefined;
+  }, [featuredImageUrlQuery]);
+
+  const mainPhotoUrl = useMemo(() => {
+    if (mainPhotoUrlQuery?.url) return mainPhotoUrlQuery.url;
+    return user?.image || "";
+  }, [mainPhotoUrlQuery, user?.image]);
+
   if (!user) return <Loader2 className="animate-spin mx-auto" />;
   return (
     <div className="w-full h-full ">
       {/* Header with Profile */}
-      <div className="bg-[#BDC7DB] pt-6 pb-16 px-4">
+      <div
+        className="pt-6 pb-16 px-4 bg-[#BDC7DB] bg-cover bg-center"
+        style={
+          featuredImageUrl
+            ? {
+                backgroundImage: `url('${featuredImageUrl}')`,
+              }
+            : {}
+        }
+      >
         <BackButton />
 
         <div className="flex flex-col items-center">
           <Avatar className="w-24 h-24 border-4 border-[#4A6B8A]">
-            <AvatarImage src={user.image || ""} alt="Profile" />
+            <AvatarImage src={mainPhotoUrl || user.image || ""} alt="Profile" />
             <AvatarFallback
               className="text-2xl"
               style={{
@@ -98,7 +122,7 @@ const SettingsPage = () => {
           <h1 className="text-2xl font-semibold text-gray-900 mb-1 ">
             Settings
           </h1>
-          <p className="font-size-10 font-bold h-5 text-gray-500">
+          <p className="text-xs font-bold h-5 text-gray-500">
             Manage your account and preferences
           </p>
         </div>

@@ -11,7 +11,7 @@ const menuItems: MenuDockItem[] = [
   { label: "Discover", icon: LucideHome, link: "/discover" },
 
   { label: "Chat", icon: LucideMessageCircle, link: "/chats" },
-  { label: "Notify", icon: LucideBell, link: "/notify" },
+  { label: "Notify", icon: LucideBell, link: "/notifications" },
   { label: "Profile", icon: LucideUser, link: "/account/settings" },
 ];
 const pathnameMaps: { [key: string]: string[] } = {

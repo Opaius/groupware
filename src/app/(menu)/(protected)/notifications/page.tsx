@@ -1,92 +1,404 @@
 "use client";
 
+import { useState } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "~/convex/_generated/api";
 import {
   Handshake,
   MessageSquare,
-  Hourglass,
-  CheckCircle2,
+  Heart,
+  XCircle,
+  Loader2,
+  UserCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BackButton } from "@/components/back-button";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { Id } from "~/convex/_generated/dataModel";
 
-// Tipuri de date pentru notificări ca să fie ușor de gestionat
-const notifications = [
-  {
-    id: 1,
-    type: "request",
-    icon: <Handshake className="text-[#1d324e]" size={32} />,
-    text: "Your skill is requested!",
-    buttonText: "Accept trade",
+// Map notification types to icons and display text
+const NOTIFICATION_CONFIG = {
+  like: {
+    icon: Heart,
+    text: (name: string) => `${name} liked you!`,
+    actionText: "View Profile",
+    color: "text-pink-600",
+    bgColor: "bg-pink-100",
   },
-  {
-    id: 2,
-    type: "sent",
-    icon: <Handshake className="text-[#1d324e]" size={32} />,
-    text: "You requested a trade!",
-    buttonText: null, // Unele pot să nu aibă buton conform designului
+  match: {
+    icon: Handshake,
+    text: (name: string) => `It's a match with ${name}!`,
+    actionText: "Start Chatting",
+    color: "text-[#1d324e]",
+    bgColor: "bg-[#DCE9FB]",
   },
-  {
-    id: 3,
-    type: "active",
-    icon: <Handshake className="text-[#1d324e]" size={32} />,
-    text: "You are in a trade!",
-    buttonText: "Start Chatting",
+  message: {
+    icon: MessageSquare,
+    text: (name: string) => `${name} sent you a message`,
+    actionText: "Reply",
+    color: "text-blue-600",
+    bgColor: "bg-blue-100",
   },
-  {
-    id: 4,
-    type: "meeting",
-    icon: <Hourglass className="text-[#1d324e]" size={32} />,
-    text: "You have meet in 00:30!",
-    buttonText: "Start Chatting",
+  accept: {
+    icon: UserCheck,
+    text: (name: string) => `${name} accepted your request`,
+    actionText: "Continue",
+    color: "text-green-600",
+    bgColor: "bg-green-100",
   },
-  {
-    id: 5,
-    type: "received",
-    icon: <Handshake className="text-[#1d324e]" size={32} />,
-    text: "You receive a skill!",
-    buttonText: "Skill is completed",
+  reject: {
+    icon: XCircle,
+    text: (name: string) => `${name} declined your request`,
+    actionText: "Find Others",
+    color: "text-red-600",
+    bgColor: "bg-red-100",
   },
-];
+} as const;
+
+type NotificationType = keyof typeof NOTIFICATION_CONFIG;
+
+interface EnrichedNotification {
+  id: Id<"notifications">;
+  type: NotificationType;
+  read: boolean;
+  createdAt: number;
+  fromUser: {
+    id: string;
+    name: string;
+    image: string;
+  } | null;
+  conversationId: Id<"conversations"> | null;
+  matchInfo: {
+    matchId: Id<"matches">;
+    conversationId: Id<"conversations"> | null;
+  } | null;
+}
 
 export default function NotificationsPage() {
+  const router = useRouter();
+  const [isMarkingRead, setIsMarkingRead] = useState<string | null>(null);
+
+  // Fetch notifications
+  const notificationsData = useQuery(api.discover.getUserNotifications);
+  const markNotificationRead = useMutation(api.discover.markNotificationRead);
+
+  // Get matches for additional context
+  const matchesData = useQuery(api.discover.getMatches);
+
+  // Loading state
+  const isLoading = notificationsData === undefined;
+
+  // Mark notification as read and handle action
+  const handleNotificationAction = async (
+    notification: EnrichedNotification,
+  ) => {
+    if (!notification.read) {
+      setIsMarkingRead(notification.id);
+      try {
+        await markNotificationRead({
+          notificationId: notification.id as Id<"notifications">,
+        });
+        toast.success("Notification marked as read");
+      } catch (error) {
+        console.error("Failed to mark notification as read:", error);
+        toast.error("Failed to update notification");
+      } finally {
+        setIsMarkingRead(null);
+      }
+    }
+
+    // Handle navigation based on notification type
+    switch (notification.type) {
+      case "match":
+      case "message":
+        if (notification.conversationId) {
+          router.push(`/chat/${notification.conversationId}`);
+        } else if (notification.matchInfo?.conversationId) {
+          router.push(`/chat/${notification.matchInfo.conversationId}`);
+        } else if (notification.fromUser) {
+          // If no conversation exists but there's a match/message, create one
+          // This would need additional logic to create conversation
+          toast.info("Starting conversation...");
+        }
+        break;
+
+      case "like":
+        // Navigate to user's profile or discover page
+        if (notification.fromUser) {
+          // Could navigate to user profile
+          toast.info(`Viewing ${notification.fromUser.name}'s profile`);
+        }
+        break;
+
+      case "accept":
+      case "reject":
+        // Navigate to discover or matches page
+        router.push("/discover");
+        break;
+    }
+  };
+
+  // Format date to relative time
+  const formatTime = (timestamp: number) => {
+    const now = Date.now();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days > 0) return `${days}d ago`;
+    if (hours > 0) return `${hours}h ago`;
+    if (minutes > 0) return `${minutes}m ago`;
+    return "Just now";
+  };
+
+  // Group notifications by date
+  const groupNotifications = (notifications: EnrichedNotification[]) => {
+    const groups: Record<string, EnrichedNotification[]> = {};
+    const now = Date.now();
+    const oneDay = 24 * 60 * 60 * 1000;
+
+    notifications.forEach((notification) => {
+      const notificationDate = new Date(notification.createdAt);
+      const notificationTime = notificationDate.getTime();
+
+      let groupKey;
+      if (now - notificationTime < oneDay) {
+        groupKey = "Today";
+      } else if (now - notificationTime < 2 * oneDay) {
+        groupKey = "Yesterday";
+      } else {
+        groupKey = notificationDate.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+      }
+
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
+      groups[groupKey].push(notification);
+    });
+
+    return groups;
+  };
+
+  // Sort notifications by date (newest first)
+  const sortedNotifications = Array.isArray(notificationsData)
+    ? [...notificationsData].sort((a, b) => b.createdAt - a.createdAt)
+    : [];
+
+  const groupedNotifications = groupNotifications(sortedNotifications);
+
+  // Calculate unread count
+  const unreadCount = sortedNotifications.filter((n) => !n.read).length;
+
+  // Mark all as read
+  const handleMarkAllAsRead = async () => {
+    if (!notificationsData || sortedNotifications.length === 0) return;
+
+    const unreadNotifications = sortedNotifications.filter((n) => !n.read);
+    if (unreadNotifications.length === 0) return;
+
+    try {
+      await Promise.all(
+        unreadNotifications.map((notification) =>
+          markNotificationRead({ notificationId: notification.id }),
+        ),
+      );
+      toast.success(
+        `Marked ${unreadNotifications.length} notifications as read`,
+      );
+    } catch (error) {
+      console.error("Failed to mark all as read:", error);
+      toast.error("Failed to update notifications");
+    }
+  };
+
   return (
     <div className="w-full min-h-svh bg-[#DCE9FB]/50 sm:max-w-[450px] md:max-w-[500px] lg:max-w-[550px] mx-auto pb-10">
-      {/* Header Identic cu ContactSupport */}
+      {/* Header */}
       <div className="pt-6 px-6 pb-4 bg-[#DCE9FB]">
-        <div className="flex items-center gap-2">
-          <BackButton />
-          <span className="text-primary font-medium text-lg">
-            Notifications
-          </span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <BackButton />
+            <span className="text-primary font-medium text-lg">
+              Notifications
+            </span>
+            {unreadCount > 0 && (
+              <span className="bg-red-500 text-white text-xs font-medium px-2 py-1 rounded-full">
+                {unreadCount}
+              </span>
+            )}
+          </div>
+          {unreadCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleMarkAllAsRead}
+              className="text-sm text-[#037ee6] hover:text-[#0366c4]"
+            >
+              Mark all read
+            </Button>
+          )}
         </div>
       </div>
 
-      {/* Lista de Notificări */}
-      <div className="px-6 py-6 flex flex-col gap-4">
-        {notifications.map((notif) => (
-          <div
-            key={notif.id}
-            className="bg-white rounded-[15px] p-6 flex flex-col items-center justify-center shadow-sm border border-black/5"
-          >
-            {/* Iconița */}
-            <div className="mb-4">{notif.icon}</div>
-
-            {/* Textul Notificării */}
-            <p className="text-[#1d324e] font-semibold text-[1.1rem] mb-4 text-center">
-              {notif.text}
+      {/* Notifications List */}
+      <div className="px-6 py-6">
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-[#1d324e] mb-4" />
+            <p className="text-gray-600">Loading notifications...</p>
+          </div>
+        ) : sortedNotifications.length === 0 ? (
+          <div className="text-center py-12">
+            <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              No notifications yet
+            </h3>
+            <p className="text-gray-500 mb-6">
+              When you receive likes, matches, or messages, they'll appear here.
             </p>
+            <Button
+              onClick={() => router.push("/discover")}
+              className="bg-[#1d324e] hover:bg-[#2a4568]"
+            >
+              Discover People
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-6">
+            {Object.entries(groupedNotifications).map(
+              ([date, notifications]) => (
+                <div key={date}>
+                  <h3 className="text-sm font-semibold text-gray-500 mb-3 px-2">
+                    {date}
+                  </h3>
+                  <div className="flex flex-col gap-3">
+                    {notifications.map((notification) => {
+                      const config = NOTIFICATION_CONFIG[notification.type];
+                      const Icon = config.icon;
+                      const fromUserName =
+                        notification.fromUser?.name || "Someone";
 
-            {/* Butonul (dacă există) - Folosind shadcn Button stilizat ca în poza ta */}
-            {notif.buttonText && (
-              <Button
-                variant="outline"
-                className="w-full max-w-[200px] h-[40px] bg-white border border-[#6085b9] text-[#037ee6] hover:bg-[#f0f7ff] rounded-lg transition-colors"
-              >
-                {notif.buttonText}
-              </Button>
+                      return (
+                        <div
+                          key={notification.id}
+                          className={`bg-white rounded-[15px] p-4 flex items-start gap-3 shadow-sm border ${
+                            notification.read
+                              ? "border-gray-200"
+                              : "border-[#037ee6] border-2"
+                          }`}
+                        >
+                          {/* Icon */}
+                          <div
+                            className={`w-12 h-12 rounded-full ${config.bgColor} flex items-center justify-center flex-shrink-0`}
+                          >
+                            <Icon className={`w-6 h-6 ${config.color}`} />
+                          </div>
+
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <p className="text-[#1d324e] font-semibold text-[1rem]">
+                                  {config.text(fromUserName)}
+                                </p>
+                                <p className="text-gray-500 text-sm mt-1">
+                                  {formatTime(notification.createdAt)}
+                                </p>
+                              </div>
+                              {!notification.read && (
+                                <div className="w-2 h-2 bg-[#037ee6] rounded-full flex-shrink-0 mt-1" />
+                              )}
+                            </div>
+
+                            {/* Action Button */}
+                            <div className="mt-3">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  handleNotificationAction(notification)
+                                }
+                                disabled={isMarkingRead === notification.id}
+                                className={`w-full max-w-[200px] h-[36px] bg-white border ${
+                                  notification.type === "reject"
+                                    ? "border-red-300 text-red-600 hover:bg-red-50"
+                                    : notification.type === "like"
+                                      ? "border-pink-300 text-pink-600 hover:bg-pink-50"
+                                      : "border-[#6085b9] text-[#037ee6] hover:bg-[#f0f7ff]"
+                                } rounded-lg transition-colors`}
+                              >
+                                {isMarkingRead === notification.id ? (
+                                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                ) : null}
+                                {config.actionText}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ),
             )}
           </div>
-        ))}
+        )}
+
+        {/* Matches Section */}
+        {matchesData && matchesData.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-[#1d324e] mb-4">
+              Your Matches ({matchesData.length})
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              {matchesData.map((match) => (
+                <div
+                  key={match?.matchId}
+                  className="bg-white rounded-lg p-4 text-center shadow-sm border border-gray-200"
+                >
+                  <div className="w-16 h-16 rounded-full bg-gray-200 mx-auto mb-3 overflow-hidden">
+                    {match?.image ? (
+                      <img
+                        src={match?.image}
+                        alt={match?.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-[#1d324e] text-white font-bold">
+                        {match?.name?.charAt(0)}
+                      </div>
+                    )}
+                  </div>
+                  <h4 className="font-semibold text-gray-900 truncate">
+                    {match?.name}
+                  </h4>
+                  <p className="text-gray-500 text-sm mt-1 truncate">
+                    {match?.bio || "No bio"}
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (match?.conversationId) {
+                        router.push(`/chat/${match.conversationId}`);
+                      } else {
+                        toast.info("No conversation started yet");
+                      }
+                    }}
+                    className="w-full mt-3 border-[#6085b9] text-[#037ee6] hover:bg-[#f0f7ff]"
+                  >
+                    Message
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

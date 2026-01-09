@@ -491,18 +491,6 @@ export default function ProfileScreenInteractive() {
           </Card>
 
           {/* 7. Butoane de Navigare inferioare */}
-          <div className="mt-8 space-y-4 mb-20">
-            <ProfileActionButton
-              icon={Settings}
-              text="Settings"
-              onClick={() => handleAction("Settings")}
-            />
-            <ProfileActionButton
-              icon={Edit2}
-              text="Edit profile"
-              onClick={() => handleAction("Edit profile")}
-            />
-          </div>
         </div>
       </div>
     </div>

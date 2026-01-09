@@ -100,4 +100,42 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_specialization", ["specializationCategoryId"]),
+  userSwipes: defineTable({
+    userId: v.string(),
+    targetUserId: v.string(),
+    action: v.union(
+      v.literal("reject"),
+      v.literal("like"),
+      v.literal("message"),
+    ),
+    conversationId: v.optional(v.id("conversations")),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_target", ["userId", "targetUserId"]),
+  notifications: defineTable({
+    userId: v.string(),
+    fromUserId: v.string(),
+    type: v.union(
+      v.literal("like"),
+      v.literal("match"),
+      v.literal("message"),
+      v.literal("accept"),
+      v.literal("reject"),
+    ),
+    userSwipeId: v.optional(v.id("userSwipes")),
+    conversationId: v.optional(v.id("conversations")),
+    read: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_read", ["userId", "read"]),
+  matches: defineTable({
+    user1Id: v.string(),
+    user2Id: v.string(),
+    conversationId: v.optional(v.id("conversations")),
+    createdAt: v.number(),
+  })
+    .index("by_user", ["user1Id"])
+    .index("by_user_pair", ["user1Id", "user2Id"]),
 });
