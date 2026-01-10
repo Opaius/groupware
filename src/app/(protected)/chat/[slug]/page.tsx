@@ -8,8 +8,8 @@ import { CalendarButton } from "@/components/chat/CalendarButton";
 import { FileUploadButton } from "@/components/chat/FileUploadButton";
 import { Textarea } from "@/components/ui/textarea";
 import { getInitials, getRandomColorBasedOnName } from "@/lib/utils";
-import { api } from "../../../../convex/_generated/api";
-import { Doc, Id } from "../../../../convex/_generated/dataModel";
+import { api } from "~/convex/_generated/api";
+import { Doc, Id } from "~/convex/_generated/dataModel";
 import { authClient } from "@/lib/auth/auth-client";
 import {
   KeyboardEvent,

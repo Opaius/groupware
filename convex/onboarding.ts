@@ -676,3 +676,259 @@ export const resetOnboarding = mutation({
     };
   },
 });
+
+/**
+ * Add a custom skill to user's profile
+ */
+export const addCustomSkill = mutation({
+  args: {
+    name: v.string(),
+    type: v.union(v.literal("current"), v.literal("wanted")),
+    category: v.optional(v.string()),
+    description: v.optional(v.string()),
+    link: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const auth = await authComponent.getAuthUser(ctx);
+    if (!auth) {
+      throw new ConvexError("Not authenticated");
+    }
+
+    const userId = auth._id;
+    const now = Date.now();
+
+    // Check if custom skill already exists for this user
+    const existingCustomSkill = await ctx.db
+      .query("userCustomSkills")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .filter((q) => q.eq(q.field("name"), args.name))
+      .first();
+
+    let customSkillId;
+    if (existingCustomSkill) {
+      // Update existing custom skill
+      await ctx.db.patch(existingCustomSkill._id, {
+        type: args.type,
+        category: args.category,
+        description: args.description || existingCustomSkill.description,
+        link: args.link || existingCustomSkill.link,
+      });
+      customSkillId = existingCustomSkill._id;
+    } else {
+      // Create new custom skill
+      customSkillId = await ctx.db.insert("userCustomSkills", {
+        userId,
+        name: args.name,
+        type: args.type,
+        category: args.category || "Other",
+        description: args.description || "",
+        link: args.link || "",
+        createdAt: now,
+      });
+    }
+
+    return {
+      success: true,
+      customSkillId,
+      name: args.name,
+      type: args.type,
+      category: args.category || "Other",
+    };
+  },
+});
+
+/**
+ * Remove a skill by name and type
+ */
+export const removeSkillByName = mutation({
+  args: {
+    name: v.string(),
+    type: v.union(v.literal("current"), v.literal("wanted")),
+  },
+  handler: async (ctx, args) => {
+    const auth = await authComponent.getAuthUser(ctx);
+    if (!auth) {
+      throw new ConvexError("Not authenticated");
+    }
+
+    const userId = auth._id;
+
+    // First try to find as custom skill
+    const customSkill = await ctx.db
+      .query("userCustomSkills")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("name"), args.name),
+          q.eq(q.field("type"), args.type),
+        ),
+      )
+      .first();
+
+    if (customSkill) {
+      await ctx.db.delete(customSkill._id);
+      return {
+        success: true,
+        type: "custom",
+        skillId: customSkill._id,
+        name: customSkill.name,
+      };
+    }
+
+    // If not custom, try to find as catalog skill
+    // This is more complex because we need to find through userSkills -> skill
+    const userSkills = await ctx.db
+      .query("userSkills")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .filter((q) => q.eq(q.field("type"), args.type))
+      .collect();
+
+    for (const userSkill of userSkills) {
+      const skill = await ctx.db.get(userSkill.skillId);
+      if (skill && skill.name === args.name) {
+        await ctx.db.delete(userSkill._id);
+        return {
+          success: true,
+          type: "catalog",
+          userSkillId: userSkill._id,
+          name: skill.name,
+        };
+      }
+    }
+
+    throw new ConvexError("Skill not found");
+  },
+});
+
+/**
+ * Add a skill with search functionality (similar to onboarding)
+ * Searches for existing catalog skills, creates custom skill if not found
+ */
+export const addSkill = mutation({
+  args: {
+    name: v.string(),
+    type: v.union(v.literal("current"), v.literal("wanted")),
+    category: v.optional(v.string()),
+    description: v.optional(v.string()),
+    link: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const auth = await authComponent.getAuthUser(ctx);
+    if (!auth) {
+      throw new ConvexError("Not authenticated");
+    }
+
+    const userId = auth._id;
+    const now = Date.now();
+
+    // First search for the skill in the catalog
+    const searchResults = await ctx.db
+      .query("skill")
+      .withSearchIndex("search_skill", (q) => q.search("name", args.name))
+      .take(10);
+
+    // Find exact match or case-insensitive match
+    const exactMatch = searchResults.find(
+      (skill) => skill.name.toLowerCase() === args.name.toLowerCase(),
+    );
+
+    let skillId: Id<"userSkills"> | Id<"userCustomSkills">;
+    let skillType: "catalog" | "custom";
+    let addedSkillName: string;
+
+    if (exactMatch) {
+      // Add as catalog skill
+      skillType = "catalog";
+
+      // Check if user already has this catalog skill
+      const existingUserSkill = await ctx.db
+        .query("userSkills")
+        .withIndex("by_user", (q) => q.eq("userId", userId))
+        .filter((q) => q.eq(q.field("skillId"), exactMatch._id))
+        .first();
+
+      if (existingUserSkill) {
+        // Update existing skill type if different
+        if (existingUserSkill.type !== args.type) {
+          await ctx.db.patch(existingUserSkill._id, {
+            type: args.type,
+          });
+        }
+        skillId = existingUserSkill._id;
+      } else {
+        // Create new user skill
+        skillId = await ctx.db.insert("userSkills", {
+          userId,
+          skillId: exactMatch._id,
+          type: args.type,
+          description: args.description || "",
+          link: args.link || "",
+          createdAt: now,
+        });
+      }
+
+      addedSkillName = exactMatch.name;
+
+      // Get category info
+      let categoryName = "Unknown";
+      if (exactMatch.categoryId) {
+        const category = await ctx.db.get(exactMatch.categoryId);
+        if (category) {
+          categoryName = category.name;
+        }
+      }
+
+      return {
+        success: true,
+        type: skillType,
+        skillId,
+        name: addedSkillName,
+        category: categoryName,
+        isCustom: false,
+      };
+    } else {
+      // Create as custom skill
+      skillType = "custom";
+
+      // Check if custom skill already exists for this user
+      const existingCustomSkill = await ctx.db
+        .query("userCustomSkills")
+        .withIndex("by_user", (q) => q.eq("userId", userId))
+        .filter((q) => q.eq(q.field("name"), args.name))
+        .first();
+
+      if (existingCustomSkill) {
+        // Update existing custom skill
+        await ctx.db.patch(existingCustomSkill._id, {
+          type: args.type,
+          category: args.category,
+          description: args.description || existingCustomSkill.description,
+          link: args.link || existingCustomSkill.link,
+        });
+        skillId = existingCustomSkill._id;
+      } else {
+        // Create new custom skill
+        skillId = await ctx.db.insert("userCustomSkills", {
+          userId,
+          name: args.name,
+          type: args.type,
+          category: args.category || "Other",
+          description: args.description || "",
+          link: args.link || "",
+          createdAt: now,
+        });
+      }
+
+      addedSkillName = args.name;
+
+      return {
+        success: true,
+        type: skillType,
+        skillId,
+        name: addedSkillName,
+        category: args.category || "Other",
+        isCustom: true,
+      };
+    }
+  },
+});
