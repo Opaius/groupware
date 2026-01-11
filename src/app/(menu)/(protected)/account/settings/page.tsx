@@ -1,5 +1,6 @@
 "use client";
 import {
+  ChevronLeft,
   ChevronRight,
   User,
   Trophy,
@@ -9,6 +10,7 @@ import {
   BellRing,
   Mail,
   Moon,
+  Sprout,
   HelpCircle,
   AlertCircle,
   Info,
@@ -17,6 +19,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,7 +28,6 @@ import { useState, useMemo } from "react";
 import { authClient } from "@/lib/auth/auth-client";
 import { getInitials, getRandomColorBasedOnName } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { BackButton } from "@/components/back-button";
 
 import Link from "next/link";
 import { useQuery } from "convex/react";
@@ -86,7 +88,28 @@ const SettingsPage = () => {
             : {}
         }
       >
-        <BackButton />
+        <div className="flex justify-between items-start px-1">
+          <Button
+            onClick={() => router.back()}
+            variant="outline"
+            className="border-blue-300 bg-blue-100 hover:bg-blue-200 rounded-full shadow-sm"
+            size="icon-lg"
+            aria-label="Go back"
+          >
+            <ChevronLeft className="size-7" />
+          </Button>
+          <Button
+            variant="outline"
+            className="border-green-300 bg-green-100 hover:bg-green-200 rounded-full shadow-sm"
+            size="icon-lg"
+            asChild
+            aria-label="Go to plant page"
+          >
+            <Link href="/plant">
+              <Sprout className="size-7" color="#36784a" />
+            </Link>
+          </Button>
+        </div>
 
         <div className="flex flex-col items-center">
           <Avatar className="w-24 h-24 border-4 border-[#4A6B8A]">

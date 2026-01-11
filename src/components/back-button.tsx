@@ -3,14 +3,14 @@ import { ChevronLeft } from "lucide-react";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 
-export function BackButton() {
+export function BackButton({ className }: { className?: string }) {
   const router = useRouter();
   return (
     <Button
       onClick={() => {
         router.back();
       }}
-      className="flex font-semibold"
+      className={`flex font-semibold ${className || ""}`}
       variant="ghost"
       size="icon-lg"
     >

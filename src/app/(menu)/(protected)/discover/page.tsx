@@ -613,7 +613,7 @@ export default function DiscoverPage() {
             setAIQuery("");
             setIsAISearching(false);
           }}
-          className="fixed bottom-24 right-6 z-50 size-16 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center text-white hover:scale-110 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+          className="absolute bottom-24 right-6 z-50 size-16 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center text-white hover:scale-110 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
           aria-label="AI Search"
         >
           <Brain className="size-8" />

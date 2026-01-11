@@ -41,7 +41,7 @@ export default async function RootLayout({
             disableTransitionOnChange
           >
             <ConvexClientProvider>
-              <div className="max-w-md w-full relative border box-content overflow-hidden">
+              <div className="max-w-md w-full relative border box-content overflow-hidden ">
                 <NotificationProvider>{children}</NotificationProvider>
                 <Toaster />
               </div>
