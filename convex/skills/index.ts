@@ -63,13 +63,7 @@ export const getSkillsByCategoryName = query({
 export const getSkillsByCategoryNames = query({
   args: { categoryNames: v.array(v.string()) },
   handler: async (ctx, args) => {
-    console.log(
-      "DEBUG getSkillsByCategoryNames called with:",
-      args.categoryNames,
-    );
-
     if (!args.categoryNames || args.categoryNames.length === 0) {
-      console.log("DEBUG: No category names provided, returning empty array");
       return [];
     }
 
@@ -80,14 +74,9 @@ export const getSkillsByCategoryNames = query({
           .query("skillCategory")
           .filter((q) => q.eq(q.field("name"), categoryName))
           .first();
-        console.log("DEBUG: Found category", categoryName, ":", category?._id);
+
         return category;
       }),
-    );
-
-    console.log(
-      "DEBUG: All categories found:",
-      categories.map((c) => c?.name),
     );
 
     // Filter out null categories and get skills for each
@@ -95,20 +84,13 @@ export const getSkillsByCategoryNames = query({
       (category): category is NonNullable<typeof category> => category !== null,
     );
 
-    console.log("DEBUG: Valid categories:", validCategories.length);
-
     const result = await Promise.all(
       validCategories.map(async (category) => {
         const skills = await ctx.db
           .query("skill")
           .withIndex("by_category", (q) => q.eq("categoryId", category._id))
           .collect();
-        console.log(
-          "DEBUG: Found",
-          skills.length,
-          "skills for category",
-          category.name,
-        );
+
         return {
           category: {
             name: category.name,
@@ -119,11 +101,6 @@ export const getSkillsByCategoryNames = query({
       }),
     );
 
-    console.log(
-      "DEBUG: Returning result with",
-      result.length,
-      "category groups",
-    );
     return result;
   },
 });

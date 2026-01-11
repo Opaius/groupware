@@ -116,7 +116,6 @@ export const MenuDock: React.FC<MenuDockProps> = ({
         // Check for wildcard match (e.g., "/users/*")
         if (p.endsWith("/*")) {
           // Log the wildcard path for debugging (optional)
-          console.log("Checking wildcard path:", p);
 
           // **FIX:** Slice off the last TWO characters: '/*'
           const base = p.slice(0, -2);

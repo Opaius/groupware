@@ -60,12 +60,10 @@ const PaymentPage: React.FC = () => {
   };
 
   const handlePayment = () => {
-    console.log("Processing payment with data:", formData);
     alert("Payment processed! (Demo only)");
   };
 
   const handleApplePay = () => {
-    console.log("Processing Apple Pay");
     alert("Apple Pay processing! (Demo only)");
   };
 

@@ -9,8 +9,6 @@ import authSchema from "./betterAuth/schema";
 
 const siteUrl = process.env.SITE_URL || "http://localhost:3000";
 
-console.log(siteUrl);
-
 export const authComponent = createClient<DataModel, typeof authSchema>(
   components.betterAuth,
   {

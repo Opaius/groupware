@@ -154,9 +154,7 @@ const SkillHistoryPage = () => {
   ).length;
 
   // Log when skills change
-  useEffect(() => {
-    console.log("Skills updated:", skills);
-  }, [skills]);
+  useEffect(() => {}, [skills]);
 
   const handleStatusChange = (index: number, newStatus: SkillStatus) => {
     setSkills((prevSkills) => {

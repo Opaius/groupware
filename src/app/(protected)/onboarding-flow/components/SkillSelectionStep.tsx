@@ -240,38 +240,23 @@ const SkillSelectionStep = ({
     }
   }, [selectedSkills, formData, updateFormData]);
 
-  console.log("DEBUG: selectedCategories", selectedCategories);
-  console.log("DEBUG: selectedSkills", selectedSkills);
-
   // Fetch all categories to get their icons
   const allCategories = useQuery(api.skills.index.getAllSkillCategories);
 
   // Fetch skills for selected categories using single query
   const categoryNames = selectedCategories.map((cat) => cat.name);
-  console.log("DEBUG: categoryNames", categoryNames);
 
   const categorySkillsData = useQuery(
     api.skills.index.getSkillsByCategoryNames,
     { categoryNames },
   );
-  console.log("DEBUG: categorySkillsData", categorySkillsData);
 
   // Check if any query is still loading
   const isLoading =
     allCategories === undefined || categorySkillsData === undefined;
 
-  console.log("DEBUG: isLoading", isLoading);
-  console.log("DEBUG: allCategories", allCategories);
-  console.log("DEBUG: api.skills.index", api.skills?.index);
-
   // Group skills by category and apply search filter
   const skillsByCategory = useMemo(() => {
-    console.log(
-      "DEBUG: useMemo called, isLoading:",
-      isLoading,
-      "categorySkillsData:",
-      categorySkillsData,
-    );
     if (isLoading) return [];
 
     const result = (categorySkillsData || []).map((group) => {
@@ -333,7 +318,6 @@ const SkillSelectionStep = ({
 
   // Handle loading state
   if (isLoading) {
-    console.log("DEBUG: Showing loading state");
     return (
       <div className="flex-1 overflow-y-auto px-6 mt-6 pb-10 flex items-center justify-center">
         <div>Loading skills...</div>

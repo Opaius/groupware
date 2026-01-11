@@ -294,7 +294,6 @@ export default function ProfileScreenInteractive() {
         step: "profile",
         data: { bio: description },
       });
-      console.log("Descriere salvată:", description);
       setIsEditingDescription(false);
     } catch (error) {
       console.error("Error saving description:", error);
@@ -475,8 +474,6 @@ export default function ProfileScreenInteractive() {
           data: { featuredImage: storageId },
         });
       }
-
-      console.log(`${type} uploaded successfully:`, storageId);
     } catch (error) {
       console.error("Upload error:", error);
       let errorMessage = "Upload failed";

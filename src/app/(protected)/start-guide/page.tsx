@@ -30,7 +30,6 @@ export default function StartGuidePage() {
   }, [onboardingStatus, router]);
 
   const handleComplete = async () => {
-    console.log("Guide completed, navigating to onboarding");
     try {
       await markAccountCreationComplete();
       router.push("/onboarding-flow");
@@ -41,7 +40,6 @@ export default function StartGuidePage() {
   };
 
   const handleSkip = async () => {
-    console.log("Guide skipped, navigating to onboarding");
     try {
       await markAccountCreationComplete();
       router.push("/onboarding-flow");

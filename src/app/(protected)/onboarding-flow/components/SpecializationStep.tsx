@@ -15,7 +15,6 @@ const CategorySelectionStep = ({
   const skillCategories = useQueryWithStatus(
     api.skills.index.getAllSkillCategories,
   );
-  console.log(skillCategories);
 
   // Handle loading state
   if (skillCategories.isPending) {

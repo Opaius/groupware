@@ -21,7 +21,7 @@ export default function ContactSupportPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle form submission
-    console.log({ fullName, email, subject, message, file });
+    // Handle form submission
   };
 
   return (
