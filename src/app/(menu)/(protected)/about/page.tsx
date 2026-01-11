@@ -120,7 +120,7 @@ export default function AboutSkillTrade() {
     { name: "Sebastian Ciocan", image: "Sebi.png" },
     { name: "Iuliana Roman", image: "sandra.png" },
     { name: "Răzvan Juncu", image: "razvan.png" },
-    { name: "Alexandru Geaboc", image: "alex.png" },
+    { name: "Alexandru Geaboc", image: "Alex.png" },
   ];
 
   const webDesigners: TeamMember[] = [
