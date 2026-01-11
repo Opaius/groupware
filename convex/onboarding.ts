@@ -304,6 +304,43 @@ export const completeOnboarding = mutation({
     const now = Date.now();
 
     // ============================================================================
+    // VALIDATION: Ensure all required onboarding data is provided
+    // ============================================================================
+
+    // 1. Validate primary specialization
+    if (!args.specializationLabel || args.specializationLabel.trim() === "") {
+      throw new ConvexError("Please select a primary specialization");
+    }
+
+    // 2. Validate at least one wanted skill from catalog
+    const hasWantedCatalogSkill = args.catalogSkills.some(
+      (skill) => skill.type === "wanted",
+    );
+    if (!hasWantedCatalogSkill) {
+      throw new ConvexError(
+        "Please select at least one skill you want to learn",
+      );
+    }
+
+    // 3. Validate at least one mastered skill (custom skill)
+    const hasMasteredCustomSkill = args.customSkills.some(
+      (skill) => skill.type === "current",
+    );
+    if (!hasMasteredCustomSkill) {
+      throw new ConvexError("Please add at least one skill you have mastered");
+    }
+
+    // 4. Validate bio
+    if (!args.bio || args.bio.trim() === "") {
+      throw new ConvexError("Please add a bio to your profile");
+    }
+
+    // 5. Validate main photo
+    if (!args.mainPhoto || args.mainPhoto.trim() === "") {
+      throw new ConvexError("Please add a main profile photo");
+    }
+
+    // ============================================================================
     // 1. FIND OR CREATE SKILL CATEGORY FOR SPECIALIZATION
     // ============================================================================
     let specializationCategoryId: Id<"skillCategory"> | undefined = undefined;

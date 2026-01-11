@@ -231,17 +231,20 @@ export default function OnboardingFlowPage() {
   const isFormValid = () => {
     switch (currentStep) {
       case 0:
-        // Must have at least one category selected
-        return (formData.selectedCategories?.length || 0) > 0;
+        // Must have at least one category selected and a primary specialization
+        return (
+          (formData.selectedCategories?.length || 0) > 0 &&
+          formData.specializationLabel?.trim()?.length > 0
+        );
       case 1:
-        // Must have at least one skill selected from chosen categories
+        // Must have at least one wanted skill selected from chosen categories
         return (formData.selectedSkills?.length || 0) > 0;
       case 2:
-        // Custom skills are optional
-        return true;
+        // Must have at least one mastered skill (custom skill)
+        return (formData.customSkills?.length || 0) > 0;
       case 3:
-        // Bio is optional, images are optional
-        return true;
+        // Must have bio and main photo
+        return formData.bio?.trim()?.length > 0 && !!formData.mainPhotoUrl;
       default:
         return false;
     }

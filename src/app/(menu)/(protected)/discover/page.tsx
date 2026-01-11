@@ -1,7 +1,12 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { useMutation, usePaginatedQuery, useAction } from "convex/react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import {
+  useMutation,
+  usePaginatedQuery,
+  useAction,
+  useQuery,
+} from "convex/react";
 import { api } from "~/convex/_generated/api";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -67,6 +72,9 @@ export default function DiscoverPage() {
   const currentUser = session?.user;
   const router = useRouter();
 
+  // Check onboarding status
+  const onboardingStatus = useQuery(api.onboarding.getOnboardingStatus, {});
+
   // State for expanded sections per user
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
   const [isSwiping, setIsSwiping] = useState(false);
@@ -85,6 +93,31 @@ export default function DiscoverPage() {
     };
     filteredUsers: AIEnrichedUser[];
   } | null>(null);
+
+  // Redirect if onboarding not completed
+  useEffect(() => {
+    if (onboardingStatus === undefined) {
+      return; // Still loading
+    }
+
+    if (!onboardingStatus?.hasSeenOnboarding) {
+      router.push("/onboarding-flow");
+    }
+  }, [onboardingStatus, router]);
+
+  // Show loading while checking onboarding
+  if (onboardingStatus === undefined) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  // Don't render anything if redirecting (will redirect in useEffect)
+  if (!onboardingStatus?.hasSeenOnboarding) {
+    return null;
+  }
 
   // Helper function to generate concise AI filter display text
   const getAIFilterDisplayText = (
@@ -144,6 +177,25 @@ export default function DiscoverPage() {
     { initialNumItems: 10 }, // Load more initially for better UX
   );
 
+  // AI search action
+  const searchWithAI = useAction(api.discover.searchUsersWithAI);
+
+  // Swipe mutation
+  const createSwipe = useMutation(api.discover.createSwipe);
+
+  // Toggle expanded state for a user
+  const toggleExpand = useCallback((userId: string) => {
+    setExpandedUsers((prev) => {
+      const next = new Set(prev);
+      if (next.has(userId)) {
+        next.delete(userId);
+      } else {
+        next.add(userId);
+      }
+      return next;
+    });
+  }, []);
+
   // Extract users from results - handle both array and paginated result
   const rawUsers: DiscoverUser[] = Array.isArray(usersData)
     ? usersData
@@ -153,9 +205,6 @@ export default function DiscoverPage() {
   const users: AIEnrichedUser[] = aiFilter
     ? aiFilter.filteredUsers
     : rawUsers.map((user) => ({ ...user }));
-
-  // AI search action
-  const searchWithAI = useAction(api.discover.searchUsersWithAI);
 
   // Handle AI search
   const handleAISearch = async () => {
@@ -181,20 +230,16 @@ export default function DiscoverPage() {
         matchScore: user.matchScore,
         matchReasons: user.matchReasons,
         isGoodMatch: user.isGoodMatch,
-        aiClassification: user.aiClassification,
+        aiClassification: results.classification,
       }));
 
+      const classification = results.classification;
+
       setAiFilter({
-        classification: results.aiClassification,
+        classification,
         filteredUsers,
       });
-
       setShowAIModal(false);
-      setAIQuery("");
-
-      toast.success(
-        `AI found ${filteredUsers.length} matches based on your search`,
-      );
     } catch (error) {
       console.error("AI search failed:", error);
       toast.error("AI search failed. Please try again.");
@@ -202,22 +247,6 @@ export default function DiscoverPage() {
       setIsAISearching(false);
     }
   };
-
-  // Mutations
-  const createSwipe = useMutation(api.discover.createSwipe);
-
-  // Toggle expanded state for a user
-  const toggleExpand = useCallback((userId: string) => {
-    setExpandedUsers((prev) => {
-      const next = new Set(prev);
-      if (next.has(userId)) {
-        next.delete(userId);
-      } else {
-        next.add(userId);
-      }
-      return next;
-    });
-  }, []);
 
   // Handle swipe actions
   const handleSwipeAction = async (
