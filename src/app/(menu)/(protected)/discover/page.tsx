@@ -94,6 +94,51 @@ export default function DiscoverPage() {
     filteredUsers: AIEnrichedUser[];
   } | null>(null);
 
+  // Fetch discoverable users with pagination
+  const {
+    results: usersData,
+    status: queryStatus,
+    loadMore,
+    isLoading,
+  } = usePaginatedQuery(
+    api.discover.getDiscoverableUsers,
+    {},
+    { initialNumItems: 10 }, // Load more initially for better UX
+  );
+
+  // AI search action
+  const searchWithAI = useAction(api.discover.searchUsersWithAI);
+
+  // Swipe mutation
+  const createSwipe = useMutation(api.discover.createSwipe);
+
+  // Toggle expanded state for a user
+  const toggleExpand = useCallback((userId: string) => {
+    setExpandedUsers((prev) => {
+      const next = new Set(prev);
+      if (next.has(userId)) {
+        next.delete(userId);
+      } else {
+        next.add(userId);
+      }
+      return next;
+    });
+  }, []);
+
+  // Load more users when scrolling near bottom
+  const containerRef = useRef<HTMLDivElement>(null);
+  const handleScroll = useCallback(() => {
+    if (!containerRef.current) return;
+
+    const container = containerRef.current;
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100;
+
+    if (isNearBottom && !isLoading && queryStatus === "CanLoadMore") {
+      loadMore(5);
+    }
+  }, [isLoading, queryStatus, loadMore]);
+
   // Redirect if onboarding not completed
   useEffect(() => {
     if (onboardingStatus === undefined) {
@@ -165,37 +210,6 @@ export default function DiscoverPage() {
     }
   };
 
-  // Fetch discoverable users with pagination
-  const {
-    results: usersData,
-    status: queryStatus,
-    loadMore,
-    isLoading,
-  } = usePaginatedQuery(
-    api.discover.getDiscoverableUsers,
-    {},
-    { initialNumItems: 10 }, // Load more initially for better UX
-  );
-
-  // AI search action
-  const searchWithAI = useAction(api.discover.searchUsersWithAI);
-
-  // Swipe mutation
-  const createSwipe = useMutation(api.discover.createSwipe);
-
-  // Toggle expanded state for a user
-  const toggleExpand = useCallback((userId: string) => {
-    setExpandedUsers((prev) => {
-      const next = new Set(prev);
-      if (next.has(userId)) {
-        next.delete(userId);
-      } else {
-        next.add(userId);
-      }
-      return next;
-    });
-  }, []);
-
   // Extract users from results - handle both array and paginated result
   const rawUsers: DiscoverUser[] = Array.isArray(usersData)
     ? usersData
@@ -230,10 +244,10 @@ export default function DiscoverPage() {
         matchScore: user.matchScore,
         matchReasons: user.matchReasons,
         isGoodMatch: user.isGoodMatch,
-        aiClassification: results.classification,
+        aiClassification: results.aiClassification,
       }));
 
-      const classification = results.classification;
+      const classification = results.aiClassification;
 
       setAiFilter({
         classification,
@@ -304,20 +318,6 @@ export default function DiscoverPage() {
     setAiFilter(null);
     toast.info("AI filter cleared");
   };
-
-  // Load more users when scrolling near bottom
-  const containerRef = useRef<HTMLDivElement>(null);
-  const handleScroll = useCallback(() => {
-    if (!containerRef.current) return;
-
-    const container = containerRef.current;
-    const { scrollTop, scrollHeight, clientHeight } = container;
-    const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100;
-
-    if (isNearBottom && !isLoading && queryStatus === "CanLoadMore") {
-      loadMore(5);
-    }
-  }, [isLoading, queryStatus, loadMore]);
 
   // Simplified card component
   const UserCard = ({ user }: { user: AIEnrichedUser }) => {
