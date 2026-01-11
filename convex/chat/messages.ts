@@ -27,7 +27,31 @@ export const getConversationMetadata = query({
     const userProfiles = await Promise.all(
       participants.map(async (p) => {
         const profile = await authComponent.getAnyUserById(ctx, p.userId);
-        return { userId: p.userId, profile };
+        if (!profile) {
+          return { userId: p.userId, profile: null };
+        }
+
+        // Get user profile to resolve profile image
+        const userProfile = await ctx.db
+          .query("userProfiles")
+          .withIndex("by_user", (q) => q.eq("userId", p.userId))
+          .first();
+
+        let image = profile.image || "";
+        // If profile has mainPhoto, try to resolve it from storage
+        if (userProfile?.mainPhoto) {
+          const url = await ctx.storage.getUrl(userProfile.mainPhoto);
+          if (url) image = url;
+        }
+
+        // Return profile with resolved image
+        return {
+          userId: p.userId,
+          profile: {
+            ...profile,
+            image,
+          },
+        };
       }),
     );
 
@@ -96,6 +120,29 @@ export const listEnrichedMessages = query({
           msg.senderId,
         );
 
+        // Get user profile to resolve profile image
+        let image = senderProfile?.image || "";
+        if (senderProfile) {
+          const userProfile = await ctx.db
+            .query("userProfiles")
+            .withIndex("by_user", (q) => q.eq("userId", msg.senderId))
+            .first();
+
+          // If profile has mainPhoto, try to resolve it from storage
+          if (userProfile?.mainPhoto) {
+            const url = await ctx.storage.getUrl(userProfile.mainPhoto);
+            if (url) image = url;
+          }
+        }
+
+        // Create enriched sender profile
+        const enrichedSenderProfile = senderProfile
+          ? {
+              ...senderProfile,
+              image,
+            }
+          : undefined;
+
         // Fetch Attachments if any
         let attachments: (ConvexDoc<"messageAttachments"> & {
           url?: string;
@@ -125,7 +172,7 @@ export const listEnrichedMessages = query({
 
         return {
           ...msg,
-          sender: senderProfile, // <--- Embed sender info here
+          sender: enrichedSenderProfile, // <--- Embed enriched sender info here
           attachments,
           appointment,
           metadata: {

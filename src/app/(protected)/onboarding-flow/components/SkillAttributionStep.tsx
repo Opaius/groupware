@@ -438,6 +438,21 @@ const SkillAttributionStep = ({
           saved as your mastered skills.
         </p>
       </div>
+
+      {/* Validation warning for missing mastered skills */}
+      {formData.customSkills.length === 0 && (
+        <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center gap-2">
+            <span className="text-red-600 font-medium">
+              ⚠️ Action Required:
+            </span>
+          </div>
+          <p className="text-red-700 text-sm mt-1">
+            Please add at least one skill you have mastered. You must add
+            mastered skills to continue.
+          </p>
+        </div>
+      )}
     </div>
   );
 };

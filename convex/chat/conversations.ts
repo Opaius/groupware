@@ -70,10 +70,25 @@ export const getConversationsWithMetadata = query({
           );
 
           if (otherUser) {
+            // Get user profile to resolve profile image
+            const profile = await ctx.db
+              .query("userProfiles")
+              .withIndex("by_user", (q) =>
+                q.eq("userId", otherParticipant.userId),
+              )
+              .first();
+
+            let avatarUrl = otherUser.image || "";
+            // If profile has mainPhoto, try to resolve it from storage
+            if (profile?.mainPhoto) {
+              const url = await ctx.storage.getUrl(profile.mainPhoto);
+              if (url) avatarUrl = url;
+            }
+
             otherUserData = {
               id: otherParticipant.userId, // Use userId, not participantId, for frontend nav
               name: otherUser.name,
-              avatarUrl: otherUser.image,
+              avatarUrl,
             };
           } else {
             // Handle case where other user was deleted
@@ -203,6 +218,19 @@ export const getUsersWithDirectConversations = query({
         const otherUser = await authComponent.getAnyUserById(ctx, otherUserId);
         if (!otherUser) return null;
 
+        // Get user profile to resolve profile image
+        const profile = await ctx.db
+          .query("userProfiles")
+          .withIndex("by_user", (q) => q.eq("userId", otherUserId))
+          .first();
+
+        let avatarUrl = otherUser.image || "";
+        // If profile has mainPhoto, try to resolve it from storage
+        if (profile?.mainPhoto) {
+          const url = await ctx.storage.getUrl(profile.mainPhoto);
+          if (url) avatarUrl = url;
+        }
+
         // Get conversation info
         const conversation = await ctx.db.get(chat.conversationId);
         if (!conversation) return null;
@@ -222,7 +250,7 @@ export const getUsersWithDirectConversations = query({
             id: otherUserId,
             name: otherUser.name,
             email: otherUser.email || "",
-            avatarUrl: otherUser.image || "",
+            avatarUrl,
           },
           conversation: {
             lastMessageAt: conversation.lastMessageAt || null,

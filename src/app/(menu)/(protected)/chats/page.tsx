@@ -96,6 +96,7 @@ export default function ConversationList() {
                   name: otherUser.name || "Unknown User",
                   avatar: otherUser.avatarUrl || "",
                 }}
+                userId={otherUser.id}
                 notSeenMessagesCount={dt.notSeenMessagesCount ?? null}
               />
             );

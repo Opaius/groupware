@@ -226,19 +226,29 @@ export default function ProfilePage({ params }: ProfilePageProps) {
         </div>
       </div>
 
+      {/* Banner */}
+      <div
+        className="h-64 w-full bg-cover bg-center bg-no-repeat relative bg-[#1d324e]"
+        style={{
+          backgroundImage: profileData.featuredImage
+            ? `url(${profileData.featuredImage})`
+            : `url('https://placehold.co/390x256/1d324e/ffffff?text=Banner+Image')`,
+        }}
+      />
+
       {/* Profile Content */}
-      <div className="px-6 py-6">
+      <div className="relative px-6 -mt-20">
         {/* Profile Header */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 mb-6">
           <div className="flex flex-col items-center text-center mb-6">
-            <Avatar className="w-32 h-32 mb-4 border-4 border-white shadow-lg">
+            <Avatar className="w-40 h-40 mb-4 border-4 border-white shadow-lg relative z-10">
               <AvatarImage
                 src={profileData.image}
                 alt={profileData.name}
                 className="object-cover"
               />
               <AvatarFallback
-                className="text-3xl"
+                className="text-4xl"
                 style={{ backgroundColor: userColor }}
               >
                 {userInitials}

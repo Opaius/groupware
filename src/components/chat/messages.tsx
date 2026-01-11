@@ -22,6 +22,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useRouter } from "next/navigation";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -130,6 +131,7 @@ export function ChatMessage({
   currentUserId: string;
   messageId: string;
 }) {
+  const router = useRouter();
   const timestamp = useMemo(() => {
     return timeSent instanceof Date
       ? timeSent
@@ -168,7 +170,10 @@ export function ChatMessage({
     >
       {/* Left Avatar (for others) */}
       {!isOwnMessage && (
-        <Avatar className="size-8 shrink-0 mt-auto">
+        <Avatar
+          className="size-8 shrink-0 mt-auto cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => router.push(`/profile/${senderId}`)}
+        >
           <AvatarImage className="object-cover" src={avatarUrl ?? ""} />
           <AvatarFallback
             className="text-2xs"
@@ -422,7 +427,10 @@ export function ChatMessage({
 
       {/* Right Avatar (for self) */}
       {isOwnMessage && (
-        <Avatar className="size-8 shrink-0 mt-auto">
+        <Avatar
+          className="size-8 shrink-0 mt-auto cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => router.push(`/profile/${senderId}`)}
+        >
           <AvatarImage className="object-cover" src={avatarUrl ?? ""} />
           <AvatarFallback
             className="text-2xs"

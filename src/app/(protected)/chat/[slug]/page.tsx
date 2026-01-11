@@ -20,6 +20,7 @@ import {
   useState,
 } from "react";
 import { useMutation, useQuery, usePaginatedQuery } from "convex/react";
+import { useRouter } from "next/navigation";
 
 import { BackButton } from "@/components/back-button";
 
@@ -64,6 +65,7 @@ export default function ChatPage({
   const conversationId = slug as Id<"conversations">;
   const { data: session } = authClient.useSession();
   const currentUserId = session?.user?.id ?? null;
+  const router = useRouter();
 
   // router and peer are kept for potential future use
 
@@ -238,13 +240,27 @@ export default function ChatPage({
       <div className="flex shrink-0 items-center px-4 h-16 border-b shadow-sm z-10 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
         <BackButton />
         <div className="grow flex items-center gap-3 overflow-hidden">
-          <Avatar className="size-10 border">
+          <Avatar
+            className="size-10 border cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => {
+              if (headerParticipant?.userId) {
+                router.push(`/profile/${headerParticipant.userId}`);
+              }
+            }}
+          >
             <AvatarImage src={headerAvatar ?? ""} />
             <AvatarFallback style={{ backgroundColor: avatarColor }}>
               {avatarName}
             </AvatarFallback>
           </Avatar>
-          <div className="flex flex-col overflow-hidden">
+          <div
+            className="flex flex-col overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => {
+              if (headerParticipant?.userId) {
+                router.push(`/profile/${headerParticipant.userId}`);
+              }
+            }}
+          >
             <p className="font-semibold text-sm truncate">{headerName}</p>
             <p className="text-xs text-muted-foreground truncate">
               {conversationData ? "Active now" : "Loading..."}

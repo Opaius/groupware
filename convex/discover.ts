@@ -480,10 +480,54 @@ export const createSwipe = mutation({
       )
       .first();
 
-    if (existingSwipe) throw new ConvexError("Already swiped on this user");
+    console.log(
+      `[createSwipe] Existing swipe found:`,
+      existingSwipe
+        ? {
+            id: existingSwipe._id,
+            action: existingSwipe.action,
+            conversationId: existingSwipe.conversationId,
+          }
+        : "none",
+    );
 
     const now = Date.now();
     let conversationId = undefined;
+    let swipeId = undefined;
+
+    // If there's an existing swipe, update it instead of creating a new one
+    if (existingSwipe) {
+      console.log(
+        `[createSwipe] Updating existing swipe from ${existingSwipe.action} to ${args.action}`,
+      );
+
+      // If changing from a message action and we had a conversation, we might need to handle conversation updates
+      if (
+        existingSwipe.action === "message" &&
+        args.action !== "message" &&
+        existingSwipe.conversationId
+      ) {
+        console.log(
+          `[createSwipe] User changing from message to ${args.action}, keeping conversation ${existingSwipe.conversationId}`,
+        );
+      }
+
+      // Update the existing swipe
+      await ctx.db.patch(existingSwipe._id, {
+        action: args.action,
+        conversationId:
+          args.action === "message" ? existingSwipe.conversationId : undefined,
+        createdAt: now, // Update timestamp to reflect change
+      });
+
+      swipeId = existingSwipe._id;
+      conversationId =
+        args.action === "message" ? existingSwipe.conversationId : undefined;
+
+      console.log(
+        `[createSwipe] Updated existing swipe ${swipeId} to action ${args.action}`,
+      );
+    }
 
     if (args.action === "message") {
       const key = makeDirectKey(currentUserIdStr, args.targetUserId);
@@ -494,53 +538,109 @@ export const createSwipe = mutation({
 
       if (existingDirectChat) {
         conversationId = existingDirectChat.conversationId;
+        console.log(
+          `[createSwipe] Found existing conversation: ${conversationId}`,
+        );
       } else {
-        const convId = await ctx.db.insert("conversations", {
-          isGroup: false,
-          createdAt: now,
-          updatedAt: now,
-        });
-        await Promise.all([
-          ctx.db.insert("conversationParticipants", {
-            conversationId: convId,
-            userId: currentUserIdStr,
-          }),
-          ctx.db.insert("conversationParticipants", {
-            conversationId: convId,
-            userId: args.targetUserId,
-          }),
-          ctx.db.insert("directChats", { key, conversationId: convId }),
-        ]);
-        conversationId = convId;
+        console.log(
+          `[createSwipe] Creating new conversation for ${currentUserIdStr} and ${args.targetUserId}`,
+        );
+        try {
+          const convId = await ctx.db.insert("conversations", {
+            isGroup: false,
+            createdAt: now,
+            updatedAt: now,
+          });
+          await Promise.all([
+            ctx.db.insert("conversationParticipants", {
+              conversationId: convId,
+              userId: currentUserIdStr,
+            }),
+            ctx.db.insert("conversationParticipants", {
+              conversationId: convId,
+              userId: args.targetUserId,
+            }),
+            ctx.db.insert("directChats", { key, conversationId: convId }),
+          ]);
+          conversationId = convId;
+          console.log(
+            `[createSwipe] Created new conversation: ${conversationId}`,
+          );
+        } catch (error) {
+          console.error(`[createSwipe] Failed to create conversation:`, error);
+          throw new ConvexError(
+            `Failed to create conversation: ${error instanceof Error ? error.message : "Unknown error"}`,
+          );
+        }
+      }
+
+      // If we're updating an existing swipe, we need to update the conversationId
+      if (existingSwipe && conversationId !== existingSwipe.conversationId) {
+        console.log(
+          `[createSwipe] Updating conversationId on swipe ${existingSwipe._id} from ${existingSwipe.conversationId} to ${conversationId}`,
+        );
+        await ctx.db.patch(existingSwipe._id, { conversationId });
       }
     }
 
-    const swipeId = await ctx.db.insert("userSwipes", {
-      userId: currentUserIdStr,
-      targetUserId: args.targetUserId,
-      action: args.action,
-      conversationId,
-      createdAt: now,
-    });
+    // Only insert a new swipe if we didn't update an existing one
+    if (!existingSwipe) {
+      console.log(
+        `[createSwipe] Creating new swipe for ${currentUserIdStr} -> ${args.targetUserId} with action ${args.action}`,
+      );
+      try {
+        swipeId = await ctx.db.insert("userSwipes", {
+          userId: currentUserIdStr,
+          targetUserId: args.targetUserId,
+          action: args.action,
+          conversationId,
+          createdAt: now,
+        });
+        console.log(`[createSwipe] Created new swipe: ${swipeId}`);
+      } catch (error) {
+        console.error(`[createSwipe] Failed to insert swipe:`, error);
+        throw new ConvexError(
+          `Failed to record swipe: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
+      }
+    }
 
-    // Notify target
-    await ctx.db.insert("notifications", {
-      userId: args.targetUserId,
-      fromUserId: currentUserIdStr,
-      type:
-        args.action === "like"
-          ? "like"
-          : args.action === "message"
-            ? "message"
-            : "reject",
-      userSwipeId: swipeId,
-      conversationId,
-      read: false,
-      createdAt: now,
-    });
+    // Notify target (only if action changed or it's a new swipe)
+    if (!existingSwipe || existingSwipe.action !== args.action) {
+      console.log(
+        `[createSwipe] Creating notification for ${args.targetUserId} about ${args.action} action`,
+      );
+      try {
+        await ctx.db.insert("notifications", {
+          userId: args.targetUserId,
+          fromUserId: currentUserIdStr,
+          type:
+            args.action === "like"
+              ? "like"
+              : args.action === "message"
+                ? "message"
+                : "reject",
+          userSwipeId: swipeId,
+          conversationId,
+          read: false,
+          createdAt: now,
+        });
+        console.log(`[createSwipe] Notification created successfully`);
+      } catch (error) {
+        console.error(`[createSwipe] Failed to create notification:`, error);
+        // Don't throw here - the swipe was recorded successfully
+      }
+    } else {
+      console.log(
+        `[createSwipe] Skipping notification - action unchanged (${args.action})`,
+      );
+    }
 
     // Match Check
     if (args.action === "like") {
+      console.log(
+        `[createSwipe] Checking for mutual like with ${args.targetUserId}`,
+      );
       const mutualSwipe = await ctx.db
         .query("userSwipes")
         .withIndex("by_user_target", (q) =>
@@ -549,6 +649,17 @@ export const createSwipe = mutation({
             .eq("targetUserId", currentUserIdStr),
         )
         .first();
+
+      console.log(
+        `[createSwipe] Mutual swipe found:`,
+        mutualSwipe
+          ? {
+              id: mutualSwipe._id,
+              action: mutualSwipe.action,
+              conversationId: mutualSwipe.conversationId,
+            }
+          : "none",
+      );
 
       if (mutualSwipe && mutualSwipe.action === "like") {
         const [user1Id, user2Id] = [currentUserIdStr, args.targetUserId].sort();
@@ -560,6 +671,9 @@ export const createSwipe = mutation({
           .first();
 
         if (!existingMatch) {
+          console.log(
+            `[createSwipe] Creating match between ${user1Id} and ${user2Id}`,
+          );
           // If mutual swipe didn't start a convo, start one now
           let matchConversationId = mutualSwipe.conversationId;
 
@@ -573,7 +687,11 @@ export const createSwipe = mutation({
 
             if (existingDirectChat) {
               matchConversationId = existingDirectChat.conversationId;
+              console.log(
+                `[createSwipe] Found existing conversation for match: ${matchConversationId}`,
+              );
             } else {
+              console.log(`[createSwipe] Creating new conversation for match`);
               // Create new conversation for the match
               const convId = await ctx.db.insert("conversations", {
                 isGroup: false,
@@ -592,12 +710,29 @@ export const createSwipe = mutation({
                 ctx.db.insert("directChats", { key, conversationId: convId }),
               ]);
               matchConversationId = convId;
+              console.log(
+                `[createSwipe] Created new conversation for match: ${matchConversationId}`,
+              );
             }
 
             // Update mutual swipe with conversationId for future reference
             await ctx.db.patch(mutualSwipe._id, {
               conversationId: matchConversationId,
             });
+            console.log(
+              `[createSwipe] Updated mutual swipe ${mutualSwipe._id} with conversation ${matchConversationId}`,
+            );
+          }
+
+          // Also update current user's swipe with conversationId if it differs from match conversation
+          if (!conversationId || conversationId !== matchConversationId) {
+            console.log(
+              `[createSwipe] Updating current swipe conversation ${conversationId ? "from " + conversationId + " " : ""}to match conversation ${matchConversationId}`,
+            );
+            await ctx.db.patch(swipeId!, {
+              conversationId: matchConversationId,
+            });
+            conversationId = matchConversationId;
           }
 
           await ctx.db.insert("matches", {
@@ -606,32 +741,72 @@ export const createSwipe = mutation({
             conversationId: matchConversationId,
             createdAt: now,
           });
+          console.log(`[createSwipe] Match record created`);
 
-          await Promise.all([
-            ctx.db.insert("notifications", {
-              userId: currentUserIdStr,
-              fromUserId: args.targetUserId,
-              type: "match",
-              userSwipeId: swipeId,
-              conversationId: matchConversationId,
-              read: false,
-              createdAt: now,
-            }),
-            ctx.db.insert("notifications", {
-              userId: args.targetUserId,
-              fromUserId: currentUserIdStr,
-              type: "match",
-              userSwipeId: mutualSwipe._id,
-              conversationId: matchConversationId,
-              read: false,
-              createdAt: now,
-            }),
-          ]);
+          try {
+            await Promise.all([
+              ctx.db.insert("notifications", {
+                userId: currentUserIdStr,
+                fromUserId: args.targetUserId,
+                type: "match",
+                userSwipeId: swipeId,
+                conversationId: matchConversationId,
+                read: false,
+                createdAt: now,
+              }),
+              ctx.db.insert("notifications", {
+                userId: args.targetUserId,
+                fromUserId: currentUserIdStr,
+                type: "match",
+                userSwipeId: mutualSwipe._id,
+                conversationId: matchConversationId,
+                read: false,
+                createdAt: now,
+              }),
+            ]);
+            console.log(`[createSwipe] Match notifications created`);
+          } catch (error) {
+            console.error(
+              `[createSwipe] Failed to create match notifications:`,
+              error,
+            );
+            // Continue anyway - the match was created
+          }
+        } else {
+          console.log(
+            `[createSwipe] Match already exists between ${user1Id} and ${user2Id}`,
+          );
         }
+      } else if (mutualSwipe && mutualSwipe.action !== "like") {
+        console.log(
+          `[createSwipe] Mutual swipe exists but action is ${mutualSwipe.action}, not a match`,
+        );
+      }
+    } else if (args.action === "reject") {
+      // If user rejects after previously liking, check if there was a match and remove it
+      console.log(
+        `[createSwipe] Reject action - checking for existing match to remove`,
+      );
+      const [user1Id, user2Id] = [currentUserIdStr, args.targetUserId].sort();
+      const existingMatch = await ctx.db
+        .query("matches")
+        .withIndex("by_user_pair", (q) =>
+          q.eq("user1Id", user1Id).eq("user2Id", user2Id),
+        )
+        .first();
+
+      if (existingMatch) {
+        console.log(
+          `[createSwipe] Removing existing match ${existingMatch._id} due to reject action`,
+        );
+        await ctx.db.delete(existingMatch._id);
       }
     }
 
-    return { success: true, swipeId, conversationId };
+    console.log(
+      `[createSwipe] Successfully completed for ${currentUserIdStr} -> ${args.targetUserId} with action ${args.action}`,
+    );
+    return { success: true, swipeId: swipeId!, conversationId };
   },
 });
 

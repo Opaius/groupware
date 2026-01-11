@@ -14,6 +14,7 @@ type Props = {
     name: string;
     avatar: string;
   };
+  userId: string;
   notSeenMessagesCount: number | null;
 };
 
@@ -26,17 +27,26 @@ export function ConvCardSkeleton() {
 export function ConversationCard({
   conversation,
   otherUser,
+  userId,
   notSeenMessagesCount,
 }: Props) {
   const router = useRouter();
   const avatarColor = getRandomColorBasedOnName(otherUser.name);
+
+  const handleAvatarClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    router.push(`/profile/${userId}`);
+  };
 
   return (
     <div
       className="w-full gap-2 items-center py-5 flex rounded-md px-4 border-muted border-2 h-18 shadow-[4px_4px_4px_0px_var(--color-accent)] cursor-pointer hover:bg-muted transition-all"
       onClick={() => router.push(`/chat/${conversation._id}`)}
     >
-      <Avatar className="size-12">
+      <Avatar
+        className="size-12 cursor-pointer hover:opacity-80 transition-opacity"
+        onClick={handleAvatarClick}
+      >
         <AvatarFallback style={{ backgroundColor: avatarColor }}>
           {getInitials(otherUser.name)}
         </AvatarFallback>

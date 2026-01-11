@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { getRedirectDestination } from "@/lib/auth/server-actions";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   // 1. Set a default destination (fallback)
   let destination = "/auth";

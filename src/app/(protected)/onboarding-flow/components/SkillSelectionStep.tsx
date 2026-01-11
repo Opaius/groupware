@@ -428,7 +428,7 @@ const SkillSelectionStep = ({
       </div>
 
       {/* Selection summary */}
-      {selectedSkills.length > 0 && (
+      {selectedSkills.length > 0 ? (
         <div className="mb-6 p-4 bg-blue-50 rounded-lg">
           <div className="flex justify-between items-center">
             <h4 className="text-blue-900 font-medium">
@@ -459,6 +459,17 @@ const SkillSelectionStep = ({
               </div>
             )}
           </div>
+        </div>
+      ) : (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center gap-2">
+            <Target className="size-5 text-red-600" />
+            <h4 className="text-red-900 font-medium">No skills selected</h4>
+          </div>
+          <p className="text-red-700 text-sm mt-1">
+            Please select at least one skill you want to learn from the
+            categories below. You must select skills to continue.
+          </p>
         </div>
       )}
 

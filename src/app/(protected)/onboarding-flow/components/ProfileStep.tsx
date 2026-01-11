@@ -309,6 +309,7 @@ const ProfileStep = ({ formData, updateFormData }: ProfileStepProps) => {
             justifyContent: "center",
             cursor: isUploadingMain ? "wait" : "pointer",
             boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
+            border: !formData.mainPhotoUrl ? "2px solid #d32f2f" : "none",
             overflow: "hidden",
           }}
           onClick={() => !isUploadingMain && triggerFileInput("mainPhoto")}
@@ -365,6 +366,25 @@ const ProfileStep = ({ formData, updateFormData }: ProfileStepProps) => {
             <Plus size={36} color="#1D324E" strokeWidth={2} />
           )}
         </div>
+
+        {!formData.mainPhotoUrl && (
+          <div
+            style={{
+              marginTop: "10px",
+              padding: "10px 15px",
+              background: "rgba(255, 0, 0, 0.1)",
+              border: "1px solid rgba(255, 0, 0, 0.3)",
+              borderRadius: 8,
+              color: "#d32f2f",
+              fontSize: 14,
+              textAlign: "center",
+              width: "100%",
+              maxWidth: 348,
+            }}
+          >
+            ⚠️ Please add a main profile photo to continue
+          </div>
+        )}
       </div>
 
       {/* FEATURED IMAGE SECTION */}
@@ -520,6 +540,10 @@ const ProfileStep = ({ formData, updateFormData }: ProfileStepProps) => {
             borderRadius: 10,
             padding: "24px",
             boxSizing: "border-box",
+            border:
+              !formData.bio || formData.bio.trim() === ""
+                ? "2px solid #d32f2f"
+                : "none",
           }}
         >
           <textarea
@@ -541,6 +565,25 @@ const ProfileStep = ({ formData, updateFormData }: ProfileStepProps) => {
             }}
           />
         </div>
+
+        {(!formData.bio || formData.bio.trim() === "") && (
+          <div
+            style={{
+              marginTop: "10px",
+              padding: "10px 15px",
+              background: "rgba(255, 0, 0, 0.1)",
+              border: "1px solid rgba(255, 0, 0, 0.3)",
+              borderRadius: 8,
+              color: "#d32f2f",
+              fontSize: 14,
+              textAlign: "center",
+              width: "100%",
+              maxWidth: 348,
+            }}
+          >
+            ⚠️ Please write a bio about yourself to continue
+          </div>
+        )}
       </div>
     </div>
   );

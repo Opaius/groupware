@@ -1,7 +1,9 @@
 "use client";
+
 import React from "react";
 import { ArrowLeft, Instagram } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Adjust path based on your project structure
 
 type TeamMember = {
   name: string;
@@ -16,6 +18,37 @@ type TeamCardProps = {
   members: TeamMember[];
   layout?: TeamCardLayout;
 };
+
+// Helper to get initials for the Avatar Fallback
+const getInitials = (name: string) => {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+const TeamMemberItem: React.FC<{ member: TeamMember }> = ({ member }) => (
+  <div className="text-center">
+    <Avatar className="w-20 h-20 shadow-lg mx-auto mb-2 border border-slate-100">
+      <AvatarImage
+        src={member.image}
+        alt={member.name}
+        className="object-cover"
+      />
+      <AvatarFallback className="bg-cyan-100 text-cyan-800 font-medium">
+        {getInitials(member.name)}
+      </AvatarFallback>
+    </Avatar>
+    <p
+      className="text-black text-sm md:text-base"
+      style={{ fontFamily: "Hina Mincho, sans-serif" }}
+    >
+      {member.name}
+    </p>
+  </div>
+);
 
 const TeamCard: React.FC<TeamCardProps> = ({
   title,
@@ -36,97 +69,44 @@ const TeamCard: React.FC<TeamCardProps> = ({
     >
       {subtitle}
     </p>
-    <div className="w-64 h-85 bg-white rounded-[20px] shadow-lg border border-black relative mx-auto">
+
+    <div className="w-64 min-h-[340px] bg-white rounded-[20px] shadow-lg border border-black relative mx-auto flex flex-col justify-center">
+      {/* Grid Layout for 4 members */}
       {layout === "grid" && members.length === 4 && (
-        <div className="grid grid-cols-2 gap-8 p-8">
+        <div className="grid grid-cols-2 gap-6 p-6">
           {members.map((member) => (
-            <div key={member.name} className="text-center">
-              <img
-                src={member.image}
-                alt={member.name}
-                className="w-20 h-20 rounded-full shadow-lg mx-auto mb-2"
-              />
-              <p
-                className="text-black text-base"
-                style={{ fontFamily: "Hina Mincho, sans-serif" }}
-              >
-                {member.name}
-              </p>
-            </div>
+            <TeamMemberItem key={member.name} member={member} />
           ))}
         </div>
       )}
 
+      {/* Grid Layout for 3 members */}
       {layout === "grid" && members.length === 3 && (
-        <div className="p-8">
-          <div className="flex justify-around mb-8">
+        <div className="p-6">
+          <div className="flex justify-around mb-6">
             {members.slice(0, 2).map((member) => (
-              <div key={member.name} className="text-center">
-                <img
-                  src={member.image}
-                  alt={member.name}
-                  className="w-20 h-20 rounded-full shadow-lg mx-auto mb-2"
-                />
-                <p
-                  className="text-black text-base"
-                  style={{ fontFamily: "Hubballi, sans-serif" }}
-                >
-                  {member.name}
-                </p>
-              </div>
+              <TeamMemberItem key={member.name} member={member} />
             ))}
           </div>
-          <div className="text-center">
-            <img
-              src={members[2].image}
-              alt={members[2].name}
-              className="w-20 h-20 rounded-full shadow-lg mx-auto mb-2"
-            />
-            <p
-              className="text-black text-base"
-              style={{ fontFamily: "Hubballi, sans-serif" }}
-            >
-              {members[2].name}
-            </p>
+          <div className="flex justify-center">
+            <TeamMemberItem member={members[2]} />
           </div>
         </div>
       )}
 
+      {/* Two Member Layout */}
       {layout === "two" && (
-        <div className="flex justify-around items-center h-full px-4">
+        <div className="flex justify-around items-center px-4">
           {members.map((member) => (
-            <div key={member.name} className="text-center">
-              <img
-                src={member.image}
-                alt={member.name}
-                className="w-20 h-20 rounded-full shadow-lg mx-auto mb-2"
-              />
-              <p
-                className="text-black text-base"
-                style={{ fontFamily: "Hubballi, sans-serif" }}
-              >
-                {member.name}
-              </p>
-            </div>
+            <TeamMemberItem key={member.name} member={member} />
           ))}
         </div>
       )}
 
+      {/* Single Member Layout */}
       {layout === "single" && members[0] && (
-        <div className="flex justify-center items-center h-full">
-          <div className="text-center">
-            <img
-              src={members[0].image}
-              alt={members[0].name}
-              className="w-20 h-20 rounded-full shadow-lg mx-auto mb-2"
-            />
-            <p
-              className="text-black text-base"
-              style={{ fontFamily: "Hubballi, sans-serif" }}
-            >
-              {members[0].name}
-            </p>
-          </div>
+        <div className="flex justify-center items-center">
+          <TeamMemberItem member={members[0]} />
         </div>
       )}
     </div>
@@ -135,6 +115,7 @@ const TeamCard: React.FC<TeamCardProps> = ({
 
 export default function AboutSkillTrade() {
   const router = useRouter();
+
   const developers: TeamMember[] = [
     { name: "Sebastian Ciocan", image: "Sebi.png" },
     { name: "Iuliana Roman", image: "sandra.png" },
@@ -163,14 +144,12 @@ export default function AboutSkillTrade() {
   ];
 
   return (
-    <div className=" bg-violet-50  overflow-hidden mx-auto shadow-2xl pb-8">
+    <div className="bg-violet-50 overflow-hidden mx-auto shadow-2xl pb-8">
       {/* Header */}
       <div className="p-5 flex items-center gap-2">
         <button
-          onClick={() => {
-            router.back();
-          }}
-          className="w-5 h-6 bg-cyan-800 flex items-center justify-center rounded hover:bg-cyan-900 transition-colors"
+          onClick={() => router.back()}
+          className="w-8 h-8 bg-cyan-800 flex items-center justify-center rounded hover:bg-cyan-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 text-white" />
         </button>
@@ -182,18 +161,18 @@ export default function AboutSkillTrade() {
         </h1>
       </div>
 
-      {/* Hero Section with Image */}
+      {/* Hero Section */}
       <div className="px-5 mb-1 ml-2">
-        <div className="w-full h-40 bg-white rounded-[20px] shadow-lg border border-black relative flex items-center justify-center">
+        <div className="w-full h-40 bg-white rounded-[20px] shadow-lg border border-black relative flex items-center justify-center overflow-hidden">
           <div className="text-center">
             <h2
-              className="text-cyan-800 text-2xl mb-2 mr-30"
+              className="text-cyan-800 text-2xl mb-2"
               style={{ fontFamily: "serif" }}
             >
               SkillTrade
             </h2>
             <p
-              className="text-black text-base italic mr-30"
+              className="text-black text-base italic"
               style={{ fontFamily: "Hubballi, sans-serif" }}
             >
               "Grow by giving"
@@ -202,20 +181,20 @@ export default function AboutSkillTrade() {
           <img
             src="about.png"
             alt="SkillTrade"
-            className="absolute -right-1 -top-20 w-32 h-59.5 shadow-0 object-cover"
+            className="absolute -right-1 -top-10 w-32 h-auto object-cover opacity-80"
           />
         </div>
       </div>
 
       {/* Mission Section */}
-      <div className="px-8 mb-6">
+      <div className="px-8 mb-6 mt-8">
         <h2
           className="text-cyan-800 text-xl mb-4"
           style={{ fontFamily: "serif" }}
         >
           Our mission
         </h2>
-        <div className="w-full bg-white rounded-[20px] shadow-lg border border-black p-6 relative">
+        <div className="w-full bg-white rounded-[20px] shadow-lg border border-black p-6">
           <div className="w-36 h-0.5 bg-cyan-800 mx-auto mb-4"></div>
           <p
             className="text-black text-base leading-relaxed"
@@ -226,9 +205,7 @@ export default function AboutSkillTrade() {
             <br />
             <br />
             Our mission is to connect people through skill exchange — empowering
-            anyone to teach what they know and learn what they love. By trading
-            skills instead of money, we build a world where growth, creativity,
-            and collaboration are open to everyone.
+            anyone to teach what they know and learn what they love.
           </p>
         </div>
       </div>
@@ -241,74 +218,46 @@ export default function AboutSkillTrade() {
         >
           Our values
         </h2>
-
-        <div className="w-full bg-white rounded-[20px] shadow-lg border border-black p-5 mb-4">
-          <h3
-            className="text-cyan-800 text-lg mb-2"
-            style={{ fontFamily: "serif" }}
+        {[
+          {
+            title: "Community first",
+            text: "We believe in the power of sharing knowledge and building meaningful connections.",
+          },
+          {
+            title: "Safe & Trusted",
+            text: "Your safety is our priority. We verify users and moderate all exchanges.",
+          },
+          {
+            title: "Quality Learning",
+            text: "Every exchange is an opportunity to grow and share your expertise.",
+          },
+          {
+            title: "Global Impact",
+            text: "Breaking down barriers and connecting people across cultures.",
+          },
+        ].map((value) => (
+          <div
+            key={value.title}
+            className="w-full bg-white rounded-[20px] shadow-lg border border-black p-5 mb-4"
           >
-            Community first
-          </h3>
-          <p
-            className="text-black text-base"
-            style={{ fontFamily: "Hubballi, sans-serif" }}
-          >
-            We believe in the power of sharing knowledge and building meaningful
-            connections.
-          </p>
-        </div>
-
-        <div className="w-full bg-white rounded-[20px] shadow-lg border border-black p-5 mb-4">
-          <h3
-            className="text-cyan-800 text-lg mb-2"
-            style={{ fontFamily: "serif" }}
-          >
-            Safe & Trusted
-          </h3>
-          <p
-            className="text-black text-base"
-            style={{ fontFamily: "Hubballi, sans-serif" }}
-          >
-            Your safety is our priority. We verify users and moderate all
-            exchanges.
-          </p>
-        </div>
-
-        <div className="w-full bg-white rounded-[20px] shadow-lg border border-black p-5 mb-4">
-          <h3
-            className="text-cyan-800 text-lg mb-2"
-            style={{ fontFamily: "serif" }}
-          >
-            Quality Learning
-          </h3>
-          <p
-            className="text-black text-base"
-            style={{ fontFamily: "Hubballi, sans-serif" }}
-          >
-            Every exchange is an opportunity to grow and share your expertise
-            with others.
-          </p>
-        </div>
-
-        <div className="w-full bg-white rounded-[20px] shadow-lg border border-black p-5">
-          <h3
-            className="text-cyan-800 text-lg mb-2"
-            style={{ fontFamily: "serif" }}
-          >
-            Global Impact
-          </h3>
-          <p
-            className="text-black text-base"
-            style={{ fontFamily: "Hubballi, sans-serif" }}
-          >
-            Breaking down barriers and connecting people across cultures and
-            countries.
-          </p>
-        </div>
+            <h3
+              className="text-cyan-800 text-lg mb-2"
+              style={{ fontFamily: "serif" }}
+            >
+              {value.title}
+            </h3>
+            <p
+              className="text-black text-base"
+              style={{ fontFamily: "Hubballi, sans-serif" }}
+            >
+              {value.text}
+            </p>
+          </div>
+        ))}
       </div>
 
       {/* Team Sections */}
-      <div className="px-8">
+      <div className="px-8 space-y-4">
         <TeamCard
           title="Meet the team"
           subtitle="Developers"
@@ -351,7 +300,7 @@ export default function AboutSkillTrade() {
             Meet us on Instagram
           </h3>
           <div className="flex justify-center mb-3">
-            <div className="w-10 h-10 rounded-full bg-linear-to-tr from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center">
               <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                 <Instagram className="w-5 h-5 text-purple-600" />
               </div>

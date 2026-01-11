@@ -53,7 +53,13 @@ export function AllUsersList({ chat }: Props) {
         if (result) router.push(`/chat/${result}`);
       }}
     >
-      <Avatar>
+      <Avatar
+        className="cursor-pointer hover:opacity-80 transition-opacity"
+        onClick={(e) => {
+          e.stopPropagation();
+          router.push(`/profile/${chat.otherUser.id}`);
+        }}
+      >
         <AvatarFallback
           style={{
             backgroundColor: avatarColor,
@@ -64,7 +70,15 @@ export function AllUsersList({ chat }: Props) {
         <AvatarImage src={chat.otherUser.avatarUrl || ""} />
       </Avatar>
       <div className="flex flex-col flex-1 min-w-0">
-        <div className="font-semibold truncate">{chat.otherUser.name}</div>
+        <div
+          className="font-semibold truncate cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={(e) => {
+            e.stopPropagation();
+            router.push(`/profile/${chat.otherUser.id}`);
+          }}
+        >
+          {chat.otherUser.name}
+        </div>
         {hasMessages && chat.lastMessage ? (
           <div className="text-sm text-muted-foreground truncate">
             {chat.lastMessage.text}

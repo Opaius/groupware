@@ -173,11 +173,23 @@ const CategorySelectionStep = ({
             ))}
           </div>
 
-          {primarySpecialization && (
+          {primarySpecialization ? (
             <div className="mt-3 text-sm text-blue-700">
               <Star size={14} className="inline mr-1" />
               <span className="font-medium">{primarySpecialization}</span> is
               your primary specialization
+            </div>
+          ) : (
+            <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center gap-2 text-red-700">
+                <Star size={14} className="text-red-600" />
+                <span className="font-medium">Action Required:</span>
+              </div>
+              <p className="text-sm text-red-600 mt-1">
+                Please select a primary specialization by clicking "Set as
+                Primary" on one of your selected categories. This helps us match
+                you with relevant opportunities.
+              </p>
             </div>
           )}
         </div>
@@ -235,7 +247,11 @@ const CategorySelectionStep = ({
                       e.stopPropagation();
                       handleSetSpecialization(category.name);
                     }}
-                    className="w-full py-1.5 text-xs bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 transition-colors"
+                    className={`w-full py-1.5 text-xs rounded-lg font-medium transition-colors ${
+                      !primarySpecialization
+                        ? "bg-red-100 text-red-700 hover:bg-red-200"
+                        : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                    }`}
                   >
                     Set as Primary
                   </button>
@@ -251,7 +267,11 @@ const CategorySelectionStep = ({
         <h4 className="text-gray-700 font-medium mb-2">How it works:</h4>
         <ul className="text-sm text-gray-600 space-y-1">
           <li>• Select up to 3 categories that interest you most</li>
-          <li>• Choose one as your primary specialization (marked with ⭐)</li>
+          <li>
+            • <span className="font-semibold text-blue-700">IMPORTANT:</span>{" "}
+            Choose one as your primary specialization by clicking "Set as
+            Primary" (marked with ⭐)
+          </li>
           <li>
             • Next, you&apos;ll select specific skills from your chosen
             categories
@@ -261,6 +281,13 @@ const CategorySelectionStep = ({
             opportunities
           </li>
         </ul>
+        {selectionCount > 0 && !primarySpecialization && (
+          <div className="mt-3 pt-3 border-t border-gray-200">
+            <p className="text-sm font-medium text-red-600">
+              ⚠️ You must select a primary specialization to continue
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

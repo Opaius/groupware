@@ -207,7 +207,7 @@ const SettingsPage = () => {
                 </div>
                 <div className="flex-1 text-left">
                   <p className="font-medium text-gray-900">
-                    Premium Subscription  
+                    Premium Subscription
                   </p>
                   <p className="text-xs text-gray-500 mt-0.5">
                     Unlock premium features & pricing
@@ -336,7 +336,10 @@ const SettingsPage = () => {
 
               <Separator />
 
-              <button className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition">
+              <Link
+                href="/report"
+                className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition"
+              >
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <AlertCircle className="w-5 h-5 text-blue-600" />
                 </div>
@@ -347,11 +350,14 @@ const SettingsPage = () => {
                   </p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
-              </button>
+              </Link>
 
               <Separator />
 
-              <button className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition">
+              <Link
+                href="/about"
+                className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition"
+              >
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                   <Info className="w-5 h-5 text-blue-600" />
                 </div>
@@ -362,7 +368,7 @@ const SettingsPage = () => {
                   </p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
-              </button>
+              </Link>
             </CardContent>
           </Card>
         </div>
